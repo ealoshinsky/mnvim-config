@@ -1,3 +1,4 @@
+-- lsp.lua (дополняем существующий файл)
 return {
   "neovim/nvim-lspconfig",
   event = { "BufReadPre", "BufNewFile" },
@@ -12,7 +13,7 @@ return {
     -- Инициализация Mason
     require("mason").setup()
     require("mason-lspconfig").setup({
-      ensure_installed = { "gopls" },
+      ensure_installed = { "gopls", "tsserver", "html", "cssls", "jsonls" },
       automatic_installation = true,
     })
 
@@ -81,7 +82,7 @@ return {
           vim.keymap.set(mode, lhs, rhs, { buffer = bufnr, desc = desc })
         end
 
-        -- Специфичные для Go команды (если у вас установлен vim-go)
+        -- Специфичные для Go команды
         map("n", "<leader>gt", "<cmd>GoTest<CR>", "Run tests")
         map("n", "<leader>gv", "<cmd>GoVet<CR>", "Run go vet")
         map("n", "<leader>t", "<cmd>GoTestFunc<CR>", "Test current function")
@@ -90,6 +91,86 @@ return {
         -- Быстрое переключение между тестом и кодом
         map("n", "<leader>ga", "<cmd>GoAlt<CR>", "Switch test/implementation")
       end,
+    })
+
+    -- Конфигурация для TypeScript/JavaScript
+    vim.lsp.config("tsserver", {
+      capabilities = capabilities,
+      on_attach = function(client, bufnr)
+        -- Форматирование при сохранении для TypeScript/JavaScript
+        vim.api.nvim_create_autocmd("BufWritePre", {
+          buffer = bufnr,
+          callback = function()
+            vim.lsp.buf.format({
+              async = false,
+              filter = function(format_client)
+                return format_client.name == "tsserver"
+              end
+            })
+          end
+        })
+
+        -- TypeScript-специфичные команды
+        local map = function(mode, lhs, rhs, desc)
+          vim.keymap.set(mode, lhs, rhs, { buffer = bufnr, desc = desc })
+        end
+
+        map("n", "<leader>to", "<cmd>TSLspOrganize<CR>", "Organize imports")
+        map("n", "<leader>tR", "<cmd>TSLspRenameFile<CR>", "Rename file")
+        map("n", "<leader>ti", "<cmd>TSLspImportAll<CR>", "Import all")
+      end,
+      settings = {
+        typescript = {
+          inlayHints = {
+            includeInlayParameterNameHints = "all",
+            includeInlayParameterNameHintsWhenArgumentMatchesName = true,
+            includeInlayFunctionParameterTypeHints = true,
+            includeInlayVariableTypeHints = true,
+            includeInlayPropertyDeclarationTypeHints = true,
+            includeInlayFunctionLikeReturnTypeHints = true,
+            includeInlayEnumMemberValueHints = true,
+          },
+          suggest = {
+            completeFunctionCalls = true,
+          },
+        },
+        javascript = {
+          inlayHints = {
+            includeInlayParameterNameHints = "all",
+            includeInlayParameterNameHintsWhenArgumentMatchesName = true,
+            includeInlayFunctionParameterTypeHints = true,
+            includeInlayVariableTypeHints = true,
+            includeInlayPropertyDeclarationTypeHints = true,
+            includeInlayFunctionLikeReturnTypeHints = true,
+            includeInlayEnumMemberValueHints = true,
+          },
+          suggest = {
+            completeFunctionCalls = true,
+          },
+        },
+      },
+    })
+
+    -- Конфигурация для HTML (React JSX/TSX)
+    vim.lsp.config("html", {
+      capabilities = capabilities,
+      filetypes = { "html", "javascriptreact", "typescriptreact" },
+    })
+
+    -- Конфигурация для CSS
+    vim.lsp.config("cssls", {
+      capabilities = capabilities,
+    })
+
+    -- Конфигурация для JSON
+    vim.lsp.config("jsonls", {
+      capabilities = capabilities,
+      settings = {
+        json = {
+          schemas = require('schemastore').json.schemas(),
+          validate = { enable = true },
+        },
+      },
     })
 
     -- Общие горячие клавиши для всех LSP
