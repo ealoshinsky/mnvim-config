@@ -20,9 +20,9 @@ return {
 		require("mason-lspconfig").setup({
 			ensure_installed = {
 				"gopls",
-				"tsserver",
-				"html",
-				"cssls",
+				"ts_ls",
+				--				"html",
+				--	"cssls",
 				"jsonls",
 				"emmet_ls", -- для React/HTML автодополнения
 			},
