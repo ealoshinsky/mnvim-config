@@ -1,1 +1,0 @@
-# mnvim-config
