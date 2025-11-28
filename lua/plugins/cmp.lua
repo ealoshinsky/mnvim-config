@@ -40,8 +40,7 @@ return {
 				["<CR>"] = cmp.mapping.confirm({ select = false }), -- только явный выбор
 				["<C-e>"] = cmp.mapping.abort(),
 
-				-- Улучшенная навигация без Tab/S-Tab (они теперь для буферов)
-				["<Tab>"] = cmp.mapping(function()
+				["<C-n>"] = cmp.mapping(function()
 					if cmp.visible() then
 						cmp.select_next_item({ behavior = cmp.SelectBehavior.Select })
 					elseif require("luasnip").expand_or_jumpable() then

@@ -21,7 +21,7 @@ return {
 			map("n", "gD", vim.lsp.buf.declaration, "Goto Declaration")
 			map("n", "gi", vim.lsp.buf.implementation, "Goto Implementation")
 			map("n", "gr", vim.lsp.buf.references, "References")
-			map("n", "<leader>rn", vim.lsp.buf.rename, "Rename")
+			map("n", "R", vim.lsp.buf.rename, "Rename")
 			map("n", "<leader>ca", vim.lsp.buf.code_action, "Code Action")
 
 			-- Go-specific
