@@ -1,6 +1,11 @@
 vim.g.mapleader = " "
 vim.g.maplocalleader = " "
 
+vim.opt.wrap = false -- глобально выключен, но включается для специфичных буферов
+vim.opt.linebreak = true -- перенос по словам
+vim.opt.breakindent = true -- с отступом при переносе
+vim.opt.showbreak = "↪ " -- символ для переноса строк
+
 -- Базовые опции
 vim.opt.number = true
 vim.opt.relativenumber = true
@@ -15,11 +20,11 @@ vim.opt.foldmethod = "expr"
 vim.opt.foldexpr = "nvim_treesitter#foldexpr()"
 vim.opt.foldenable = false
 
--- Buffers  
-vim.keymap.set('n', '<C-n>', ':bnext<CR>', { desc = 'Next buffer' })
-vim.keymap.set('n', '<C-p>', ':bprevious<CR>', { desc = 'Previous buffer' })
-vim.keymap.set('n', '<C-d>', ':bdelete<CR>', { desc = 'Delete buffer' })
-vim.keymap.set('n', '<C-l>', ':buffers<CR>', { desc = 'List buffers' })
+-- Buffers
+vim.keymap.set("n", "<C-n>", ":bnext<CR>", { desc = "Next buffer" })
+vim.keymap.set("n", "<C-p>", ":bprevious<CR>", { desc = "Previous buffer" })
+vim.keymap.set("n", "<C-d>", ":bdelete<CR>", { desc = "Delete buffer" })
+vim.keymap.set("n", "<C-l>", ":buffers<CR>", { desc = "List buffers" })
 
 -- Code folding
 vim.opt.foldmethod = "expr" -- Использовать treesitter для фолдинга
@@ -34,9 +39,26 @@ vim.keymap.set("n", "<leader>m", "zM", { silent = true, desc = "Close all folds"
 vim.keymap.set("n", "<leader>s", ":w<CR>", { noremap = true, silent = true, desc = "Save me" })
 
 -- Trouble
-vim.keymap.set("n", "<leader>xx", "<cmd>Trouble diagnostics toggle<cr>", { noremap = true, desc = "Troble diagnostics" })
+vim.keymap.set(
+	"n",
+	"<leader>xx",
+	"<cmd>Trouble diagnostics toggle<cr>",
+	{ noremap = true, desc = "Troble diagnostics" }
+)
 
--- Cheatsheet
-vim.keymap.set("n", "<F1>", function() 
-  -- Эта функция теперь в which-keys.lua
-end, { desc = "Show keybindings cheatsheet" })
+-- Code review
+vim.keymap.set("n", "<leader>gr", ":DiffviewOpen origin/main<CR>", { desc = "Review changes vs main" })
+vim.keymap.set("n", "<leader>gl", ":Git log --oneline<CR>", { desc = "Git log" })
+vim.keymap.set("n", "<leader>gb", ":Git blame<CR>", { desc = "Git blame" })
+vim.keymap.set("n", "<leader>gp", ":Git push<CR>", { desc = "Git push" })
+vim.keymap.set("n", "<leader>gf", ":Git fetch --all<CR>", { desc = "Git fetch all" })
+
+-- Автокоманды для включения переноса в специфичных буферах
+vim.api.nvim_create_autocmd("FileType", {
+	pattern = { "dap-repl", "dapui_console", "dapui_scopes", "dapui_watches", "qf", "Trouble" },
+	callback = function()
+		vim.opt_local.wrap = true
+		vim.opt_local.linebreak = true
+		vim.opt_local.breakindent = true
+	end,
+})

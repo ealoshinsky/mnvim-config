@@ -37,6 +37,7 @@ return {
 			on_attach = on_attach,
 			settings = {
 				gopls = {
+					templateExtensions = { "gotmpl", "tmpl", "html" },
 					completeUnimported = true,
 					usePlaceholders = true,
 					analyses = {
