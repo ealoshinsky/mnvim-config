@@ -10,16 +10,24 @@ return {
 			})
 
 			-- Простые команды ревью
-			vim.keymap.set("n", "<leader>gv", "<cmd>DiffviewOpen<CR>", { desc = "Open diff" })
+			vim.keymap.set("n", "<leader>gv", "<cmd>DiffviewOpen --imply-local<CR>", { desc = "Open diff" }) -- Убрали imply-local из базовой, но оставили опцию
 			vim.keymap.set("n", "<leader>gV", "<cmd>DiffviewClose<CR>", { desc = "Close diff" })
 
-			-- Ревью текущей ветки против main
+			-- Ревью любой ветки через Telescope
 			vim.keymap.set("n", "<leader>gr", function()
-				local branch = vim.fn.system("git branch --show-current"):gsub("\n", "")
-				vim.cmd("DiffviewOpen origin/main..." .. branch)
+				require("telescope.builtin").git_branches({
+					attach_mappings = function(_, map)
+						map("i", "<CR>", function(prompt_bufnr)
+							local selection = require("telescope.actions.state").get_selected_entry()
+							require("telescope.actions").close(prompt_bufnr)
+							require("utils.git_utils").review_branch(selection.value)
+						end)
+						return true
+					end,
+				})
 			end, { desc = "Review branch" })
 
-			vim.keymap.set("n", "<leader>gv", "<cmd>DiffviewOpen --imply-local<CR>", { desc = "Open diff" })
+			vim.keymap.set("n", "<leader>gf", "<cmd>DiffviewFileHistory %<CR>", { desc = "File history" }) -- Добавили из keymaps.lua для консолидации
 		end,
 	},
 

@@ -11,7 +11,7 @@ local safe_git = function(args)
 	end
 
 	-- Убираем только конечные пробелы и переводы строк
-	return result:gsub("\n$", ""):gsub("\r$", "")
+	return result:gsub("\n$$ ", ""):gsub("\r $$", "")
 end
 
 -- Определяем целевую ветку (main/master) автоматически
@@ -45,22 +45,38 @@ M.is_git_repo = function()
 	return safe_git({ "rev-parse", "--git-dir" }) ~= nil
 end
 
-M.review_current_branch = function()
+--  Git fetch для обновления remote-веток
+M.git_fetch = function()
+	local result = safe_git({ "fetch", "origin" })
+	if not result then
+		vim.notify("Failed to git fetch origin", vim.log.levels.ERROR)
+	end
+end
+
+-- Универсальная функция для ревью любой ветки (с фетчем)
+M.review_branch = function(branch)
 	if not M.is_git_repo() then
 		vim.notify("Not in a git repository", vim.log.levels.WARN)
 		return
 	end
 
-	local current_branch = M.get_current_branch()
+	M.git_fetch() -- Всегда фетчим перед ревью
+
 	local base_branch = M.get_base_branch()
 
-	if current_branch == "" or current_branch == base_branch then
-		vim.notify("Not on a feature branch or already on base branch", vim.log.levels.WARN)
+	if branch == "" or branch == base_branch then
+		vim.notify("Invalid branch for review", vim.log.levels.WARN)
 		return
 	end
 
-	-- Надёжный синтаксис: origin/base...HEAD + --imply-local для LSP в правом окне
-	vim.cmd("DiffviewOpen origin/" .. base_branch .. "...HEAD --imply-local")
+	-- Надёжный синтаксис: origin/base...origin/branch + --imply-local для LSP в правом окне
+	vim.cmd("DiffviewOpen origin/" .. base_branch .. "..." .. branch .. " --imply-local")
+end
+
+-- Старая функция для текущей ветки (теперь использует новую)
+M.review_current_branch = function()
+	local current_branch = M.get_current_branch()
+	M.review_branch(current_branch)
 end
 
 return M

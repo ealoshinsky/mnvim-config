@@ -18,13 +18,10 @@ map("v", "K", ":m '<-2<CR>gv=gv", { desc = "Move line up" })
 -- Git
 map("n", "<leader>gs", "<cmd>Git<CR>", { desc = "Git status" })
 map("n", "<leader>gd", "<cmd>Gdiffsplit<CR>", { desc = "Git diff" })
-map("n", "<leader>gb", "<cmd>Git blame<CR>", { desc = "Git blame" })
 map("n", "<leader>gl", "<cmd>Git log<CR>", { desc = "Git log" })
-
--- Code Review
-map("n", "<leader>gv", "<cmd>DiffviewOpen<CR>", { desc = "Open diff view" })
-map("n", "<leader>gV", "<cmd>DiffviewClose<CR>", { desc = "Close diff view" })
-map("n", "<leader>gf", "<cmd>DiffviewFileHistory %<CR>", { desc = "File history" })
+map("n", "<leader>gF", function()
+	require("utils.git_utils").git_fetch()
+end, { desc = "Git fetch" })
 
 -- Telescope
 map("n", "<leader>ff", "<cmd>Telescope find_files<CR>", { desc = "Find files" })
