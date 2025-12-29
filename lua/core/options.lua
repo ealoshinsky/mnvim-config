@@ -25,6 +25,9 @@ vim.opt.backup = false
 vim.opt.writebackup = false
 vim.opt.swapfile = false
 vim.opt.undofile = true
+vim.opt.lazyredraw = true
+vim.opt.redrawtime = 1000
+vim.loader.enable()
 
 vim.g.mapleader = " "
 vim.g.maplocalleader = " "
