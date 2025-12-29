@@ -1,14 +1,7 @@
 -- lua/core/autocmds.lua
 vim.api.nvim_create_autocmd("TextYankPost", {
 	callback = function()
-		vim.hl.on_yank({ timeout = 200 })
-	end,
-})
-
-vim.api.nvim_create_autocmd("BufWritePre", {
-	pattern = { "*.lua", "*.go", "*.js", "*.ts", "*.jsx", "*.tsx" },
-	callback = function()
-		vim.lsp.buf.format({ async = false })
+		vim.highlight.on_yank({ timeout = 200 })
 	end,
 })
 
@@ -28,7 +21,7 @@ vim.api.nvim_create_autocmd("BufWritePre", {
 	end,
 })
 
--- organize imports для TypeScript
+-- organize imports для TypeScript/JavaScript
 vim.api.nvim_create_autocmd("BufWritePre", {
 	pattern = { "*.ts", "*.tsx", "*.js", "*.jsx" },
 	callback = function()

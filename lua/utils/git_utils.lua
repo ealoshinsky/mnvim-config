@@ -10,57 +10,41 @@ local safe_git = function(args)
 		return nil
 	end
 
-	-- Убираем пробелы и переводы строк
-	result = result:gsub("%s+", "")
-	return result
+	-- Убираем только конечные пробелы и переводы строк
+	return result:gsub("\n$", ""):gsub("\r$", "")
 end
 
 -- Определяем целевую ветку (main/master) автоматически
 M.get_base_branch = function()
-	-- Сначала проверяем удалённо
 	local remote_branches = safe_git({ "branch", "-r" })
 	if remote_branches then
-		for line in remote_branches:gmatch("[^\n]+") do
-			if line:match("origin/main$") then
-				return "main"
-			elseif line:match("origin/master$") then
-				return "master"
-			end
+		if remote_branches:match("origin/main") then
+			return "main"
+		elseif remote_branches:match("origin/master") then
+			return "master"
 		end
 	end
 
-	-- Проверяем локально
-	local local_branches = safe_git({ "branch", "-a" })
+	local local_branches = safe_git({ "branch" })
 	if local_branches then
-		for line in local_branches:gmatch("[^\n]+") do
-			-- Убираем указатель текущей ветки
-			local branch = line:gsub("^%*%s*", ""):gsub("^remotes/origin/", "")
-
-			if branch == "main" then
-				return "main"
-			elseif branch == "master" then
-				return "master"
-			end
+		if local_branches:match("%* main") or local_branches:match("\nmain") then
+			return "main"
+		elseif local_branches:match("%* master") or local_branches:match("\nmaster") then
+			return "master"
 		end
 	end
 
-	-- Дефолтное значение
 	return "main"
 end
 
--- Получить текущую ветку
 M.get_current_branch = function()
-	local branch = safe_git({ "branch", "--show-current" })
-	return branch or ""
+	return safe_git({ "branch", "--show-current" }) or ""
 end
 
--- Проверить, находимся ли мы в git репозитории
 M.is_git_repo = function()
-	local result = safe_git({ "rev-parse", "--git-dir" })
-	return result ~= nil
+	return safe_git({ "rev-parse", "--git-dir" }) ~= nil
 end
 
--- Открыть diff текущей ветки против базовой
 M.review_current_branch = function()
 	if not M.is_git_repo() then
 		vim.notify("Not in a git repository", vim.log.levels.WARN)
@@ -75,7 +59,8 @@ M.review_current_branch = function()
 		return
 	end
 
-	vim.cmd("DiffviewOpen origin/" .. base_branch .. "..." .. current_branch)
+	-- Надёжный синтаксис: origin/base...HEAD + --imply-local для LSP в правом окне
+	vim.cmd("DiffviewOpen origin/" .. base_branch .. "...HEAD --imply-local")
 end
 
 return M
