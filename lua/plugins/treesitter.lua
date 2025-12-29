@@ -3,7 +3,7 @@ return {
 	"nvim-treesitter/nvim-treesitter",
 	build = ":TSUpdate",
 	config = function()
-		require("nvim-treesitter.configs").setup({
+		require("nvim-treesitter.config").setup({
 			ensure_installed = {
 				"go",
 				"gomod",
@@ -34,8 +34,4 @@ return {
 			},
 		})
 	end,
-	-- Указываем правильные имена парсеров
-	dependencies = {
-		"nvim-treesitter/nvim-treesitter-angular", -- для JSX/TSX
-	},
 }
