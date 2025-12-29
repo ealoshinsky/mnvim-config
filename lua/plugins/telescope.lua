@@ -18,6 +18,17 @@ return {
 						},
 					},
 				},
+				extensions = {
+					["ui-select"] = {
+						require("telescope.themes").get_dropdown(),
+					},
+				},
+				pickers = {
+					git_branches = { -- Кастомный picker для веток
+						theme = "dropdown",
+						show_remote_tracking_branches = true, -- Показывать origin/ветки
+					},
+				},
 			})
 			telescope.load_extension("ui-select")
 		end,
