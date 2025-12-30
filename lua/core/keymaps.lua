@@ -1,6 +1,9 @@
 -- lua/core/keymaps.lua
 local map = vim.keymap.set
 
+map("n", "<leader>p", '"+p', { desc = "Paste from clipboard" })
+map("n", "<leader>P", '"+P', { desc = "Paste before cursor" })
+map("v", "<leader>p", '"+p', { desc = "Paste over selection" })
 -- Основные
 map("n", "<leader>w", "<cmd>w<CR>", { desc = "Save" })
 map("n", "<leader>q", "<cmd>q<CR>", { desc = "Quit" })
@@ -43,25 +46,6 @@ map("n", "<leader>gb", function()
 		end,
 	})
 end, { desc = "Git: Select and checkout branch" })
-
--- Альтернатива: переключение только между буферами с ревью gitlab.nvim и обычным кодом
-map("n", "<leader>gr", function()
-	local current = vim.fn.bufname("%")
-	if current:match("gitlab%.nvim") or current:match("GitLab Review") then
-		-- Если мы в ревью — вернуться к предыдущему (код)
-		vim.cmd("b#")
-	else
-		-- Если в коде — найти и открыть буфер ревью
-		for _, buf in ipairs(vim.api.nvim_list_bufs()) do
-			local name = vim.api.nvim_buf_get_name(buf)
-			if name:match("gitlab%.nvim") or name:match("GitLab") then
-				vim.api.nvim_set_current_buf(buf)
-				return
-			end
-		end
-		vim.notify("Ревью-буфер не найден", vim.log.levels.WARN)
-	end
-end, { desc = "Toggle between code and GitLab review buffer" })
 
 -- Fugitive (основные Git-команды)
 map("n", "<leader>gs", "<cmd>Git<CR>", { desc = "Git status" })

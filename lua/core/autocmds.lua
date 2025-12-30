@@ -13,14 +13,6 @@ vim.api.nvim_create_autocmd("FileType", {
 	end,
 })
 
--- organize imports перед сохранением для Go
-vim.api.nvim_create_autocmd("BufWritePre", {
-	pattern = "*.go",
-	callback = function()
-		vim.lsp.buf.code_action({ context = { only = { "source.organizeImports" } }, apply = true })
-	end,
-})
-
 -- organize imports для TypeScript/JavaScript
 vim.api.nvim_create_autocmd("BufWritePre", {
 	pattern = { "*.ts", "*.tsx", "*.js", "*.jsx" },
