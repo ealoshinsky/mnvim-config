@@ -89,3 +89,62 @@ map("n", "<leader>m", "zM", { silent = true, desc = "Close all folds" })
 
 -- NvimTree
 map("n", "<leader>e", "<cmd>NvimTreeToggle<CR>", { desc = "File explorer" })
+
+-- ============================================
+-- nvim-lint
+-- ============================================
+map("n", "<leader>ll", function()
+	require("lint").try_lint()
+end, { desc = "Trigger linting for current file" })
+
+-- ============================================
+-- Harpoon 2
+-- ============================================
+map("n", "<leader>a", function()
+	require("harpoon"):list():add()
+end, { desc = "Harpoon: Add file" })
+
+map("n", "<C-e>", function()
+	local harpoon = require("harpoon")
+	harpoon.ui:toggle_quick_menu(harpoon:list())
+end, { desc = "Harpoon: Toggle menu" })
+
+-- Быстрый переход к файлам 1-4
+map("n", "<leader>1", function()
+	require("harpoon"):list():select(1)
+end, { desc = "Harpoon: File 1" })
+
+map("n", "<leader>2", function()
+	require("harpoon"):list():select(2)
+end, { desc = "Harpoon: File 2" })
+
+map("n", "<leader>3", function()
+	require("harpoon"):list():select(3)
+end, { desc = "Harpoon: File 3" })
+
+map("n", "<leader>4", function()
+	require("harpoon"):list():select(4)
+end, { desc = "Harpoon: File 4" })
+
+-- Навигация по списку
+map("n", "[h", function()
+	require("harpoon"):list():prev()
+end, { desc = "Harpoon: Previous" })
+
+map("n", "]h", function()
+	require("harpoon"):list():next()
+end, { desc = "Harpoon: Next" })
+
+-- ============================================
+-- nvim-surround
+-- ============================================
+-- Стандартные маппинги (уже встроены в плагин):
+-- ys{motion}{char} - добавить окружение
+-- ds{char} - удалить окружение
+-- cs{old}{new} - изменить окружение
+-- В визуальном режиме: S{char} - окружить выделение
+--
+-- Кастомные окружения:
+-- yse - if err != nil { } (Go)
+-- ysft - function wrapper
+-- yst - HTML tag с классом
