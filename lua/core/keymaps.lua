@@ -28,51 +28,6 @@ map("n", "<leader>fo", "<cmd>Telescope oldfiles<CR>", { desc = "Recent files" })
 map("n", "<leader>fc", "<cmd>Telescope commands<CR>", { desc = "Commands" })
 map("n", "<leader>fk", "<cmd>Telescope keymaps<CR>", { desc = "Keymaps" })
 
--- Telescope: Выбор и checkout git-ветки (local + remote)
-map("n", "<leader>gb", function()
-	require("telescope.builtin").git_branches({
-		attach_mappings = function(_, map)
-			map("i", "<CR>", function(prompt_bufnr)
-				local selection = require("telescope.actions.state").get_selected_entry()
-				require("telescope.actions").close(prompt_bufnr)
-				vim.cmd("Git checkout " .. selection.value)
-			end)
-			map("n", "<CR>", function(prompt_bufnr)
-				local selection = require("telescope.actions.state").get_selected_entry()
-				require("telescope.actions").close(prompt_bufnr)
-				vim.cmd("Git checkout " .. selection.value)
-			end)
-			return true
-		end,
-	})
-end, { desc = "Git: Select and checkout branch" })
-
--- Fugitive (основные Git-команды)
-map("n", "<leader>gs", "<cmd>Git<CR>", { desc = "Git status" })
-map("n", "<leader>gc", "<cmd>Git commit<CR>", { desc = "Git commit" })
-map("n", "<leader>gd", "<cmd>Gdiffsplit<CR>", { desc = "Git diff (vertical split)" })
-map("n", "<leader>gl", "<cmd>Git log<CR>", { desc = "Git log" })
-map("n", "<leader>gB", "<cmd>Git blame<CR>", { desc = "Git blame (fugitive)" }) -- если хотите fugitive-blame, иначе удалите и используйте gitsigns
-
--- Git fetch
-map("n", "<leader>gF", "<cmd>Git fetch --all<CR>", { desc = "Git fetch all" })
-
--- Diffview
-map("n", "<leader>gv", "<cmd>DiffviewOpen<CR>", { desc = "Diffview: Open (review changes)" })
-map("n", "<leader>gV", "<cmd>DiffviewClose<CR>", { desc = "Diffview: Close" })
-map("n", "<leader>gf", "<cmd>DiffviewFileHistory %<CR>", { desc = "Diffview: File history" })
-
--- GitLab.nvim (ревью MR)
-map("n", "<leader>glm", function()
-	require("gitlab").choose_merge_request()
-end, { desc = "GitLab: Choose MR to review (Telescope list)" })
-
-map("n", "<leader>glr", "<cmd>Gitlab review<CR>", { desc = "GitLab: Start/continue review current branch" })
-map("n", "<leader>gla", "<cmd>Gitlab approve<CR>", { desc = "GitLab: Approve MR" })
-map("n", "<leader>glR", "<cmd>Gitlab revoke<CR>", { desc = "GitLab: Revoke approve" })
-map("n", "<leader>glc", "<cmd>Gitlab create_comment<CR>", { desc = "GitLab: Create general comment" })
-map("n", "<leader>gls", "<cmd>Gitlab summary<CR>", { desc = "GitLab: Add summary comment" })
-
 -- Trouble
 map("n", "<leader>xx", "<cmd>Trouble diagnostics toggle<CR>", { desc = "Trouble: Diagnostics" })
 map("n", "<leader>xw", "<cmd>Trouble workspace_diagnostics toggle<CR>", { desc = "Trouble: Workspace" })
@@ -148,3 +103,19 @@ end, { desc = "Harpoon: Next" })
 -- yse - if err != nil { } (Go)
 -- ysft - function wrapper
 -- yst - HTML tag с классом
+--
+
+-- Кейбиндинги (общие для Git)
+vim.keymap.set("n", "<leader>gg", "<cmd>Neogit<cr>", { desc = "Open Neogit" })
+vim.keymap.set("n", "<leader>gd", "<cmd>DiffviewOpen<cr>", { desc = "Open Diffview" })
+vim.keymap.set("n", "<leader>gs", "<cmd>Git<cr>", { desc = "Git status" })
+vim.keymap.set("n", "<leader>gc", "<cmd>Git commit<cr>", { desc = "Git commit" })
+vim.keymap.set("n", "<leader>gl", "<cmd>LazyGit<cr>", { desc = "Open LazyGit" })
+
+-- Для GitLab
+vim.keymap.set("n", "<leader>gm", function()
+	require("gitlab").choose_merge_request()
+end, { desc = "Choice MR" })
+vim.keymap.set("n", "<leader>gr", function()
+	require("gitlab").review()
+end, { desc = "Review MR" })
