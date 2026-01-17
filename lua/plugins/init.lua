@@ -37,6 +37,17 @@ return {
 			require("lualine").setup({
 				options = {
 					theme = "onedark",
+					component_separators = { left = "", right = "" },
+					section_separators = { left = "", right = "" },
+					globalstatus = true,
+				},
+				sections = {
+					lualine_a = { "mode" },
+					lualine_b = { "branch", "diff", "diagnostics" },
+					lualine_c = { { "filename", path = 1 } }, -- полный путь как в GoLand
+					lualine_x = { "encoding", "fileformat", "filetype" },
+					lualine_y = { "progress" },
+					lualine_z = { "location" },
 				},
 			})
 		end,

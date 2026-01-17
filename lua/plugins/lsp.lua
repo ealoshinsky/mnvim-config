@@ -20,9 +20,9 @@ return {
 	{
 		"b0o/schemastore.nvim",
 	},
-
 	{
 		"neovim/nvim-lspconfig",
+		event = { "BufReadPre", "BufNewFile" },
 		dependencies = {
 			"williamboman/mason-lspconfig.nvim",
 			"hrsh7th/cmp-nvim-lsp",
@@ -43,10 +43,19 @@ return {
 				map("n", "gr", vim.lsp.buf.references, "References")
 				map("n", "<leader>rn", vim.lsp.buf.rename, "Rename")
 				map("n", "<leader>ca", vim.lsp.buf.code_action, "Code Action")
-
-				-- Go-specific tests
+				map("n", "<leader>f", function()
+					vim.lsp.buf.format({ async = true })
+				end, "Format")
+				-- Go-specific
 				if client.name == "gopls" then
-					map("n", "<leader>gt", "<cmd>GoTest -v<CR>", "Go: Run tests") -- если используете внешний runner, иначе удалить
+					map("n", "<leader>gi", function()
+						vim.ui.input({ prompt = "Import package: " }, function(input)
+							if input then
+								vim.cmd("GoImport " .. input)
+							end
+						end)
+					end, "Go: Add import")
+					map("n", "<leader>gt", "<cmd>GoTest -v<CR>", "Go: Run tests")
 				end
 			end
 
@@ -69,9 +78,10 @@ return {
 				on_attach = on_attach,
 				settings = {
 					gopls = {
-						templateExtensions = { "gotmpl", "tmpl", "html" },
 						completeUnimported = true,
 						usePlaceholders = true,
+						-- Ключевые настройки для автоимпортов:
+						experimentalPostfixCompletions = true,
 						analyses = {
 							unusedparams = true,
 							shadow = true,
@@ -91,7 +101,6 @@ return {
 						},
 						staticcheck = true,
 						gofumpt = true,
-						semanticTokens = true,
 						directoryFilters = { "-node_modules", "-.git", "-.env", "-build" },
 						codelenses = {
 							generate = true,
@@ -101,6 +110,10 @@ return {
 							upgrade_dependency = true,
 							run_vulncheck_exp = true,
 						},
+						symbolMatcher = "fuzzy",
+						semanticTokens = true,
+
+						templateExtensions = { "gotmpl", "tmpl", "html" },
 					},
 				},
 			})

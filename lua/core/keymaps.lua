@@ -105,17 +105,112 @@ end, { desc = "Harpoon: Next" })
 -- yst - HTML tag с классом
 --
 
--- Кейбиндинги (общие для Git)
-vim.keymap.set("n", "<leader>gg", "<cmd>Neogit<cr>", { desc = "Open Neogit" })
-vim.keymap.set("n", "<leader>gd", "<cmd>DiffviewOpen<cr>", { desc = "Open Diffview" })
-vim.keymap.set("n", "<leader>gs", "<cmd>Git<cr>", { desc = "Git status" })
-vim.keymap.set("n", "<leader>gc", "<cmd>Git commit<cr>", { desc = "Git commit" })
-vim.keymap.set("n", "<leader>gl", "<cmd>LazyGit<cr>", { desc = "Open LazyGit" })
+-- ============================================
+-- GitLab MR Navigation in Diff
+-- ============================================
 
--- Для GitLab
-vim.keymap.set("n", "<leader>gm", function()
-	require("gitlab").choose_merge_request()
-end, { desc = "Choice MR" })
-vim.keymap.set("n", "<leader>gr", function()
-	require("gitlab").review()
-end, { desc = "Review MR" })
+-- Основное открытие MR в diffview с комментариями
+map("n", "<leader>gD", function()
+	require("gitlab").review() -- Открывает MR с diff и комментариями
+end, { desc = "Open MR in diffview with comments" })
+
+-- Выбор MR для открытия в diff
+map("n", "<leader>gM", function()
+	require("gitlab").choose_merge_request() -- Сначала выбираем MR, затем откроется diff
+end, { desc = "Choose MR to open in diffview" })
+
+-- Если хотите прямой доступ к diff без комментариев
+map("n", "<leader>gd", function()
+	require("gitlab").open_in_diffview()
+end, { desc = "Open current MR in diffview" })
+
+-- ============================================
+-- Навигация внутри diffview (когда diff открыт)
+-- ============================================
+
+-- Переключение между файлами в diff
+map("n", "<leader>gn", function()
+	if package.loaded.diffview then
+		require("diffview").actions.select_next_entry()
+	end
+end, { desc = "Next file in diff" })
+
+map("n", "<leader>gp", function()
+	if package.loaded.diffview then
+		require("diffview").actions.select_prev_entry()
+	end
+end, { desc = "Previous file in diff" })
+
+-- Навигация по изменениям (hunks) в текущем файле
+map("n", "<leader>gj", function()
+	if package.loaded.diffview then
+		require("diffview").actions.next_conflict()
+	end
+end, { desc = "Next change in diff" })
+
+map("n", "<leader>gk", function()
+	if package.loaded.diffview then
+		require("diffview").actions.prev_conflict()
+	end
+end, { desc = "Previous change in diff" })
+
+-- Переключение между diff layout
+map("n", "<leader>gt", function()
+	if package.loaded.diffview then
+		require("diffview").actions.cycle_layout()
+	end
+end, { desc = "Toggle diff layout" })
+
+-- ============================================
+-- Навигация по комментариям GitLab в diff режиме
+-- ============================================
+
+-- Когда diff открыт через gitlab.nvim, используйте эти сочетания:
+map("n", "]c", function()
+	-- Перейти к следующему комментарию
+	vim.cmd("GitlabNextComment")
+end, { desc = "Next GitLab comment" })
+
+map("n", "[c", function()
+	-- Перейти к предыдущему комментарию
+	vim.cmd("GitlabPrevComment")
+end, { desc = "Previous GitLab comment" })
+
+-- Ответить на комментарий под курсором
+map("n", "<leader>gc", function()
+	vim.cmd("GitlabAddComment")
+end, { desc = "Add reply to comment" })
+
+-- Approve/Reject MR прямо из diff
+map("n", "<leader>ga", function()
+	vim.cmd("GitlabPerformAction")
+end, { desc = "Approve/Reject MR" })
+
+-- ============================================
+-- Быстрые действия с MR
+-- ============================================
+
+-- Обновить diff и комментарии
+map("n", "<leader>gu", function()
+	vim.cmd("GitlabRefresh")
+end, { desc = "Refresh MR data" })
+
+-- Закрыть diffview
+map("n", "<leader>gq", function()
+	if package.loaded.diffview then
+		require("diffview").close()
+	end
+end, { desc = "Close diffview" })
+
+-- Переключение между diff панелями
+map("n", "<leader>gh", function()
+	if package.loaded.diffview then
+		vim.cmd("DiffviewFocusFiles")
+	end
+end, { desc = "Focus file panel" })
+
+map("n", "<leader>gl", function()
+	if package.loaded.diffview then
+		vim.cmd("DiffviewToggleFiles")
+	end
+end, { desc = "Toggle file panel" })

@@ -4,63 +4,48 @@ return {
 	event = "VeryLazy",
 	config = function()
 		require("spellsitter").setup({
-			enable = false, -- По умолчанию выключено
+			enable = true, -- По умолчанию включено
 			hl = "SpellBad",
-			captures = { "comment", "string" },
+			captions = { "comment", "string" },
 		})
 
 		-- Настройка горячих клавиш и функций
 		local function toggle_spell()
 			if vim.wo.spell then
 				vim.wo.spell = false
-				vim.notify("Проверка орфографии ВЫКЛЮЧЕНА", vim.log.levels.INFO)
+				vim.notify("Spellcheck Off", vim.log.levels.INFO)
 			else
 				vim.wo.spell = true
-				vim.wo.spelllang = "ru,en_us" -- Русский + Английский (US)
-				vim.notify("Проверка орфографии ВКЛЮЧЕНА (ru+en)", vim.log.levels.INFO)
+				vim.bo.spelllang = "ru,en_us"
+				vim.notify("Spellcheck On", vim.log.levels.INFO)
 			end
 		end
 
 		-- Клавиши для управления
-		vim.keymap.set(
-			"n",
-			"<leader>ss",
-			toggle_spell,
-			{ desc = "Вкл/выкл проверку орфографии" }
-		)
-		vim.keymap.set("n", "<leader>sn", "]s", { desc = "Следующая ошибка" })
-		vim.keymap.set("n", "<leader>sp", "[s", { desc = "Предыдущая ошибка" })
-		vim.keymap.set("n", "<leader>sa", "zg", { desc = "Добавить слово в словарь" })
-		vim.keymap.set(
-			"n",
-			"<leader>s?",
-			"z=",
-			{ desc = "Предложить варианты исправления" }
-		)
-		vim.keymap.set(
-			"n",
-			"<leader>sw",
-			"zw",
-			{ desc = "Пометить слово как неправильное" }
-		)
+		vim.keymap.set("n", "<leader>ss", toggle_spell, { desc = "On/Off spell check" })
+		vim.keymap.set("n", "<leader>sn", "]s", { desc = "Next typos" })
+		vim.keymap.set("n", "<leader>sp", "[s", { desc = "Prev typos" })
+		vim.keymap.set("n", "<leader>sa", "zg", { desc = "Add word to dict" })
+		vim.keymap.set("n", "<leader>s?", "z=", { desc = "Show me fix" })
+		vim.keymap.set("n", "<leader>sw", "zw", { desc = "Mark word as wrond" })
 
 		-- Выбор языка
 		vim.keymap.set("n", "<leader>sru", function()
-			vim.wo.spelllang = "ru"
+			vim.bo.spelllang = "ru" -- Исправлено: vim.bo для опции буфера
 			vim.wo.spell = true
-			vim.notify("Язык проверки: Русский", vim.log.levels.INFO)
-		end, { desc = "Язык: Русский" })
+			vim.notify("Lang check: Ru", vim.log.levels.INFO)
+		end, { desc = "Lang: Ru" })
 
 		vim.keymap.set("n", "<leader>sen", function()
-			vim.wo.spelllang = "en_us"
+			vim.bo.spelllang = "en_us" -- Исправлено: vim.bo для опции буфера
 			vim.wo.spell = true
-			vim.notify("Язык проверки: Английский (US)", vim.log.levels.INFO)
-		end, { desc = "Язык: Английский" })
+			vim.notify("Lang check: En", vim.log.levels.INFO)
+		end, { desc = "Lang: En" })
 
 		vim.keymap.set("n", "<leader>srb", function()
-			vim.wo.spelllang = "ru,en_us"
+			vim.bo.spelllang = "ru,en_us" -- Исправлено: vim.bo для опции буфера
 			vim.wo.spell = true
-			vim.notify("Язык проверки: Русский+Английский", vim.log.levels.INFO)
-		end, { desc = "Язык: Русский+Английский" })
+			vim.notify("Lang check: Ru+En", vim.log.levels.INFO)
+		end, { desc = "Lang: Ru+En" })
 	end,
 }

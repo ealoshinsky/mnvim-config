@@ -18,6 +18,7 @@ return {
 					"dockerfile",
 					"bash",
 					"gitignore",
+					"proto",
 				},
 				highlight = { enable = true },
 				indent = { enable = true },
