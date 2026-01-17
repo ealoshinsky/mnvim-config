@@ -35,3 +35,15 @@ vim.opt.copyindent = true
 
 vim.g.mapleader = " "
 vim.g.maplocalleader = " "
+
+vim.opt.spell = true -- По умолчанию выключено
+vim.opt.spelllang = { "ru", "en_us" }
+vim.opt.spellsuggest = "best,9"
+vim.opt.spelloptions = "camel"
+vim.opt.spellcapcheck = "" -- Отключаем проверку заглавных букв
+
+-- Создание директории для пользовательского словаря
+local spell_dir = vim.fn.stdpath("config") .. "/spell"
+if vim.fn.isdirectory(spell_dir) == 0 then
+    vim.fn.mkdir(spell_dir, "p")
+end

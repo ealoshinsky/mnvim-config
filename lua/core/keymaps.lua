@@ -49,45 +49,45 @@ map("n", "<leader>e", "<cmd>NvimTreeToggle<CR>", { desc = "File explorer" })
 -- nvim-lint
 -- ============================================
 map("n", "<leader>ll", function()
-	require("lint").try_lint()
+    require("lint").try_lint()
 end, { desc = "Trigger linting for current file" })
 
 -- ============================================
 -- Harpoon 2
 -- ============================================
 map("n", "<leader>a", function()
-	require("harpoon"):list():add()
+    require("harpoon"):list():add()
 end, { desc = "Harpoon: Add file" })
 
 map("n", "<C-e>", function()
-	local harpoon = require("harpoon")
-	harpoon.ui:toggle_quick_menu(harpoon:list())
+    local harpoon = require("harpoon")
+    harpoon.ui:toggle_quick_menu(harpoon:list())
 end, { desc = "Harpoon: Toggle menu" })
 
 -- Быстрый переход к файлам 1-4
 map("n", "<leader>1", function()
-	require("harpoon"):list():select(1)
+    require("harpoon"):list():select(1)
 end, { desc = "Harpoon: File 1" })
 
 map("n", "<leader>2", function()
-	require("harpoon"):list():select(2)
+    require("harpoon"):list():select(2)
 end, { desc = "Harpoon: File 2" })
 
 map("n", "<leader>3", function()
-	require("harpoon"):list():select(3)
+    require("harpoon"):list():select(3)
 end, { desc = "Harpoon: File 3" })
 
 map("n", "<leader>4", function()
-	require("harpoon"):list():select(4)
+    require("harpoon"):list():select(4)
 end, { desc = "Harpoon: File 4" })
 
 -- Навигация по списку
 map("n", "[h", function()
-	require("harpoon"):list():prev()
+    require("harpoon"):list():prev()
 end, { desc = "Harpoon: Previous" })
 
 map("n", "]h", function()
-	require("harpoon"):list():next()
+    require("harpoon"):list():next()
 end, { desc = "Harpoon: Next" })
 
 -- ============================================
@@ -111,17 +111,17 @@ end, { desc = "Harpoon: Next" })
 
 -- Основное открытие MR в diffview с комментариями
 map("n", "<leader>gD", function()
-	require("gitlab").review() -- Открывает MR с diff и комментариями
+    require("gitlab").review() -- Открывает MR с diff и комментариями
 end, { desc = "Open MR in diffview with comments" })
 
 -- Выбор MR для открытия в diff
 map("n", "<leader>gM", function()
-	require("gitlab").choose_merge_request() -- Сначала выбираем MR, затем откроется diff
+    require("gitlab").choose_merge_request() -- Сначала выбираем MR, затем откроется diff
 end, { desc = "Choose MR to open in diffview" })
 
 -- Если хотите прямой доступ к diff без комментариев
 map("n", "<leader>gd", function()
-	require("gitlab").open_in_diffview()
+    require("gitlab").open_in_diffview()
 end, { desc = "Open current MR in diffview" })
 
 -- ============================================
@@ -130,35 +130,35 @@ end, { desc = "Open current MR in diffview" })
 
 -- Переключение между файлами в diff
 map("n", "<leader>gn", function()
-	if package.loaded.diffview then
-		require("diffview").actions.select_next_entry()
-	end
+    if package.loaded.diffview then
+        require("diffview").actions.select_next_entry()
+    end
 end, { desc = "Next file in diff" })
 
 map("n", "<leader>gp", function()
-	if package.loaded.diffview then
-		require("diffview").actions.select_prev_entry()
-	end
+    if package.loaded.diffview then
+        require("diffview").actions.select_prev_entry()
+    end
 end, { desc = "Previous file in diff" })
 
 -- Навигация по изменениям (hunks) в текущем файле
 map("n", "<leader>gj", function()
-	if package.loaded.diffview then
-		require("diffview").actions.next_conflict()
-	end
+    if package.loaded.diffview then
+        require("diffview").actions.next_conflict()
+    end
 end, { desc = "Next change in diff" })
 
 map("n", "<leader>gk", function()
-	if package.loaded.diffview then
-		require("diffview").actions.prev_conflict()
-	end
+    if package.loaded.diffview then
+        require("diffview").actions.prev_conflict()
+    end
 end, { desc = "Previous change in diff" })
 
 -- Переключение между diff layout
 map("n", "<leader>gt", function()
-	if package.loaded.diffview then
-		require("diffview").actions.cycle_layout()
-	end
+    if package.loaded.diffview then
+        require("diffview").actions.cycle_layout()
+    end
 end, { desc = "Toggle diff layout" })
 
 -- ============================================
@@ -167,23 +167,23 @@ end, { desc = "Toggle diff layout" })
 
 -- Когда diff открыт через gitlab.nvim, используйте эти сочетания:
 map("n", "]c", function()
-	-- Перейти к следующему комментарию
-	vim.cmd("GitlabNextComment")
+    -- Перейти к следующему комментарию
+    vim.cmd("GitlabNextComment")
 end, { desc = "Next GitLab comment" })
 
 map("n", "[c", function()
-	-- Перейти к предыдущему комментарию
-	vim.cmd("GitlabPrevComment")
+    -- Перейти к предыдущему комментарию
+    vim.cmd("GitlabPrevComment")
 end, { desc = "Previous GitLab comment" })
 
 -- Ответить на комментарий под курсором
 map("n", "<leader>gc", function()
-	vim.cmd("GitlabAddComment")
+    vim.cmd("GitlabAddComment")
 end, { desc = "Add reply to comment" })
 
 -- Approve/Reject MR прямо из diff
 map("n", "<leader>ga", function()
-	vim.cmd("GitlabPerformAction")
+    vim.cmd("GitlabPerformAction")
 end, { desc = "Approve/Reject MR" })
 
 -- ============================================
@@ -192,25 +192,97 @@ end, { desc = "Approve/Reject MR" })
 
 -- Обновить diff и комментарии
 map("n", "<leader>gu", function()
-	vim.cmd("GitlabRefresh")
+    vim.cmd("GitlabRefresh")
 end, { desc = "Refresh MR data" })
 
 -- Закрыть diffview
 map("n", "<leader>gq", function()
-	if package.loaded.diffview then
-		require("diffview").close()
-	end
+    if package.loaded.diffview then
+        require("diffview").close()
+    end
 end, { desc = "Close diffview" })
 
 -- Переключение между diff панелями
 map("n", "<leader>gh", function()
-	if package.loaded.diffview then
-		vim.cmd("DiffviewFocusFiles")
-	end
+    if package.loaded.diffview then
+        vim.cmd("DiffviewFocusFiles")
+    end
 end, { desc = "Focus file panel" })
 
 map("n", "<leader>gl", function()
-	if package.loaded.diffview then
-		vim.cmd("DiffviewToggleFiles")
-	end
+    if package.loaded.diffview then
+        vim.cmd("DiffviewToggleFiles")
+    end
 end, { desc = "Toggle file panel" })
+
+-- Функция для переключения проверки орфографии
+local function toggle_spell()
+    if vim.wo.spell then
+        vim.wo.spell = false
+        vim.notify("Spellcheck Off", vim.log.levels.INFO, { title = "Spell" })
+    else
+        vim.wo.spell = true
+        vim.bo.spelllang = "ru,en_us"
+        vim.notify("Spellcheck On", vim.log.levels.INFO, { title = "Spell" })
+    end
+end
+
+-- Основное переключение проверки орфографии
+map("n", "<leader>ss", toggle_spell, { desc = "[S]pell check On/Off" })
+
+-- Навигация по ошибкам орфографии
+map("n", "<leader>sn", "]s", { desc = "[S]pell [N]ext typo" })
+map("n", "<leader>sp", "[s", { desc = "[S]pell [P]revious typo" })
+
+-- Работа со словарем
+map("n", "<leader>sa", "zg", { desc = "[S]pell [A]dd word to dict" })
+map("n", "<leader>sx", "zug", { desc = "[S]pell remove from dict" })
+map("n", "<leader>sw", "zw", { desc = "[S]pell mark as [W]rong" })
+
+-- Предложения и исправления
+map("n", "<leader>s?", "z=", { desc = "[S]pell show suggestions" })
+map("n", "<leader>sl", "1z=", { desc = "[S]pell use first suggestion" })
+
+-- Выбор языка проверки
+map("n", "<leader>sru", function()
+    vim.bo.spelllang = "ru"
+    vim.wo.spell = true
+    vim.notify("Spell check: Russian 🇷🇺", vim.log.levels.INFO, { title = "Spell Language" })
+end, { desc = "[S]pell [Ru]ssian language" })
+
+map("n", "<leader>sen", function()
+    vim.bo.spelllang = "en_us"
+    vim.wo.spell = true
+    vim.notify("Spell check: English 🇺🇸", vim.log.levels.INFO, { title = "Spell Language" })
+end, { desc = "[S]pell [En]glish language" })
+
+map("n", "<leader>srb", function()
+    vim.bo.spelllang = "ru,en_us"
+    vim.wo.spell = true
+    vim.notify("Spell check: Russian + English 🇷🇺🇺🇸", vim.log.levels.INFO, { title = "Spell Language" })
+end, { desc = "[S]pell [R]ussian+[B]oth" })
+
+-- Интерактивные предложения с Telescope (если установлен)
+map("n", "<leader>st", function()
+    local word_under_cursor = vim.fn.expand("<cword>")
+    if word_under_cursor and #word_under_cursor > 0 then
+        local suggestions = vim.fn.spellsuggest(word_under_cursor, 15)
+        if #suggestions > 0 then
+            vim.ui.select(suggestions, {
+                prompt = "Select replacement:",
+                format_item = function(item)
+                    return "🔤 " .. item
+                end,
+            }, function(choice)
+                if choice then
+                    vim.cmd("normal! ciw" .. choice)
+                end
+            end)
+        else
+            vim.notify("No spelling suggestions found", vim.log.levels.INFO)
+        end
+    end
+end, { desc = "[S]pell [T]elescope suggestions" })
+
+-- Быстрое исправление в режиме вставки
+map("i", "<C-s>", "<C-g>u<Esc>[s1z=`]a<C-g>u", { desc = "Quick fix spelling" })
