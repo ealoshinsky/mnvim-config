@@ -18,6 +18,49 @@ return {
 			markdown = { "markdownlint" },
 		}
 
+		-- Кастомная настройка golangci-lint с упрощенными параметрами
+		lint.linters.golangcilint = {
+			cmd = "golangci-lint",
+			stdin = false, -- golangci-lint не работает через stdin
+			args = {
+				"run",
+				"--out-format=json",
+				"--issues-exit-code=0", -- Не падать с кодом 3 если есть проблемы
+				"--print-issued-lines=false",
+				"--print-linter-name=false",
+			},
+			stream = "stdout",
+			ignore_exitcode = true, -- Игнорировать exit code
+			parser = function(output, bufnr)
+				if output == "" then
+					return {}
+				end
+
+				local ok, decoded = pcall(vim.json.decode, output)
+				if not ok then
+					return {}
+				end
+
+				local diagnostics = {}
+				local issues = decoded.Issues or {}
+
+				for _, issue in ipairs(issues) do
+					table.insert(diagnostics, {
+						lnum = (issue.Pos.Line or 1) - 1,
+						col = (issue.Pos.Column or 1) - 1,
+						end_lnum = (issue.Pos.Line or 1) - 1,
+						end_col = (issue.Pos.Column or 1) - 1,
+						severity = vim.diagnostic.severity.WARN,
+						message = issue.Text,
+						source = "golangci-lint",
+						code = issue.FromLinter,
+					})
+				end
+
+				return diagnostics
+			end,
+		}
+
 		-- Автоматический запуск линтера
 		local lint_augroup = vim.api.nvim_create_augroup("lint", { clear = true })
 
@@ -31,20 +74,15 @@ return {
 					return
 				end
 
-				lint.try_lint()
+				-- Обработка ошибок линтера
+				local success, err = pcall(lint.try_lint)
+				if not success then
+					-- Не показывать ошибку если линтер просто не установлен
+					if not err:match("not found") and not err:match("executable not found") then
+						vim.notify("Linter error: " .. err, vim.log.levels.WARN)
+					end
+				end
 			end,
 		})
-
-		-- Кастомная настройка golangci-lint (опционально)
-		lint.linters.golangcilint.args = {
-			"run",
-			"--out-format",
-			"json",
-			"--show-stats=false",
-			"--print-issued-lines=false",
-			"--print-linter-name=false",
-			"--fast",
-			"--enable-all",
-		}
 	end,
 }
