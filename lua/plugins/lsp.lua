@@ -1,4 +1,12 @@
+-- lsp.lua (дополняем существующий файл)
 return {
+    "neovim/nvim-lspconfig",
+    event = { "BufReadPre", "BufNewFile" },
+    dependencies = {
+        "hrsh7th/cmp-nvim-lsp",
+        "williamboman/mason.nvim",
+        "williamboman/mason-lspconfig.nvim",
+    },
     {
         "williamboman/mason.nvim",
         config = function()
@@ -15,389 +23,268 @@ return {
             })
         end,
     },
-    -- Простой и красивый hover с подчеркиваниями
-    {
-        "https://git.sr.ht/~whynothugo/lsp_lines.nvim",
-        config = function()
-            require("lsp_lines").setup()
-            -- Отключить виртуальный текст (чтобы не дублировалось)
-            vim.diagnostic.config({ virtual_text = false })
-        end,
-    },
-
-    -- Красивые иконки для LSP
-    {
-        "onsails/lspkind.nvim",
-        config = function()
-            require("lspkind").init({
-                mode = "symbol_text",
-                preset = "codicons",
-            })
-        end,
-    },
-
-    -- Дополнительные плагины для красивого отображения
-    -- Красивые подсказки сигнатур функций
-    {
-        "ray-x/lsp_signature.nvim",
-        config = function()
-            require("lsp_signature").setup({
-                bind = true,
-                doc_lines = 2, -- Количество строк документации
-                max_height = 12, -- Максимальная высота
-                max_width = 80, -- Максимальная ширина
-                wrap = true, -- Перенос текста
-                floating_window = true, -- Плавающее окно
-                floating_window_above_cur_line = true, -- Окно над текущей строкой
-                floating_window_off_x = 5, -- Смещение по X
-                floating_window_off_y = 0, -- Смещение по Y
-                close_timeout = 4000, -- Автозакрытие через 4 секунды
-                fix_pos = false, -- Фиксированная позиция
-                hint_enable = true, -- Показывать подсказки
-                hint_prefix = "🐼 ", -- Префикс подсказки
-                hint_scheme = "String",
-                hi_parameter = "LspSignatureActiveParameter", -- Highlight активного параметра
-                handler_opts = {
-                    border = "rounded", -- Закругленные границы
-                },
-                always_trigger = false, -- Всегда показывать
-                auto_close_after = nil, -- Автозакрытие после...
-                extra_trigger_chars = {}, -- Дополнительные символы для активации
-                zindex = 200, -- Z-index окна
-                padding = "", -- Отступы
-                transparency = 10, -- Прозрачность (если поддерживается)
-                shadow_blend = 36, -- Тень
-                shadow_guibg = 'Black', -- Цвет тени
-                timer_interval = 200, -- Интервал таймера
-                toggle_key = nil, -- Клавиша переключения
-                select_signature_key = nil, -- Клавиша выбора сигнатуры
-            })
-        end,
-    },
-
-    -- Цветовая схема для диагностик
-    {
-        "folke/lsp-colors.nvim",
-        config = function()
-            require("lsp-colors").setup({
-                Error = "#db4b4b",
-                Warning = "#e0af68",
-                Information = "#0db9d7",
-                Hint = "#10B981"
-            })
-        end,
-    },
-
     {
         "b0o/schemastore.nvim",
     },
-    {
-        "neovim/nvim-lspconfig",
-        event = { "BufReadPre", "BufNewFile" },
-        dependencies = {
-            "williamboman/mason-lspconfig.nvim",
-            "hrsh7th/cmp-nvim-lsp",
-            "b0o/schemastore.nvim",
-            "ray-x/lsp_signature.nvim",
-            "folke/lsp-colors.nvim",
-        },
-        config = function()
-            local capabilities = require("cmp_nvim_lsp").default_capabilities()
+    config = function()
+        local capabilities = require("cmp_nvim_lsp").default_capabilities()
 
-            local on_attach = function(client, bufnr)
-                local map = function(m, lhs, rhs, desc)
-                    vim.keymap.set(m, lhs, rhs, { buffer = bufnr, desc = desc })
+        -- Инициализация Mason
+        require("mason").setup()
+        require("mason-lspconfig").setup({
+            ensure_installed = { "gopls", "ts_ls", "html-lsp", "css_lsp", "jsonls" },
+            automatic_installation = true,
+        })
+
+        -- Улучшенная конфигурация для gopls
+        vim.lsp.config("gopls", {
+            capabilities = capabilities,
+            settings = {
+                gopls = {
+                    completeUnimported = true,
+                    usePlaceholders = true,
+                    analyses = {
+                        unusedparams = true,
+                        shadow = true,
+                        nilness = true,
+                        unusedwrite = true,
+                        nilfunc = true,
+                        staticcheck = true,
+                        unusedvariable = true,
+                    },
+                    hints = {
+                        assignVariableTypes = true,
+                        compositeLiteralFields = true,
+                        constantValues = true,
+                        functionTypeParameters = true,
+                        parameterNames = true,
+                        rangeVariableTypes = true,
+                    },
+                    gofumpt = true,
+                    staticcheck = true,
+                    codelenses = {
+                        generate = true,
+                        gc_details = true,
+                        test = true,
+                        tidy = true,
+                    },
+                    semanticTokens = true,
+                    diagnosticsDelay = "500ms",
+                    expandWorkspaceToModule = true,
+                    buildFlags = {},
+                    directoryFilters = { "-node_modules", "-.git", "-build" },
+                    matcher = "fuzzy",
+                    deepCompletion = true,
+                    completeFunctionCalls = true,
+                },
+            },
+            flags = {
+                debounce_text_changes = 200,
+                allow_incremental_sync = true,
+            },
+            on_attach = function(client, bufnr)
+                -- Форматирование при сохранении для Go
+                vim.api.nvim_create_autocmd("BufWritePre", {
+                    buffer = bufnr,
+                    callback = function()
+                        vim.lsp.buf.format({
+                            async = false,
+                            filter = function(format_client)
+                                return format_client.name == "gopls"
+                            end,
+                        })
+                    end,
+                })
+
+                -- Дополнительные ключевые связки для Go
+                local map = function(mode, lhs, rhs, desc)
+                    vim.keymap.set(mode, lhs, rhs, { buffer = bufnr, desc = desc })
                 end
 
-                -- Настройка lsp_signature при присоединении LSP
-                require("lsp_signature").on_attach({
-                    bind = true,
-                    handler_opts = {
-                        border = "rounded"
-                    }
-                }, bufnr)
+                -- Специфичные для Go команды
+                map("n", "<leader>gt", "<cmd>GoTest<CR>", "Run tests")
+                map("n", "<leader>gv", "<cmd>GoVet<CR>", "Run go vet")
+                map("n", "<leader>t", "<cmd>GoTestFunc<CR>", "Test current function")
+                map("n", "<leader>T", "<cmd>GoTestFile<CR>", "Test current file")
 
-                map("n", "K", function()
-                    -- Используем красивый hover с границами и дополнительными настройками
-                    local params = vim.lsp.util.make_position_params()
-                    client.request("textDocument/hover", params, function(err, result, ctx, config)
-                        if err then
-                            vim.notify("Hover error: " .. err.message, vim.log.levels.WARN)
-                            return
-                        end
-                        if not (result and result.contents) then
-                            vim.notify("No documentation available", vim.log.levels.INFO)
-                            return
-                        end
+                -- Быстрое переключение между тестом и кодом
+                map("n", "<leader>ga", "<cmd>GoAlt<CR>", "Switch test/implementation")
+            end,
+        })
 
-                        -- Красивое отображение hover
-                        local border_opts = {
-                            border = "rounded",
-                            focusable = false,
-                            style = "minimal",
-                            title = " 📚 Documentation ",
-                            title_pos = "center",
-                            max_width = 80,
-                            max_height = 25,
-                        }
+        -- Конфигурация для TypeScript/JavaScript
+        vim.lsp.config("ts_ls", {
+            capabilities = capabilities,
+            on_attach = function(client, bufnr)
+                -- Форматирование при сохранении для TypeScript/JavaScript
+                vim.api.nvim_create_autocmd("BufWritePre", {
+                    buffer = bufnr,
+                    callback = function()
+                        vim.lsp.buf.format({
+                            async = false,
+                            filter = function(format_client)
+                                return format_client.name == "tsserver"
+                            end,
+                        })
+                    end,
+                })
 
-                        -- Используем кастомный обработчик для hover
-                        local handler = vim.lsp.with(
-                            vim.lsp.handlers.hover,
-                            border_opts
-                        )
+                -- TypeScript-специфичные команды
+                local map = function(mode, lhs, rhs, desc)
+                    vim.keymap.set(mode, lhs, rhs, { buffer = bufnr, desc = desc })
+                end
 
-                        handler(err, result, ctx, config)
-                    end, bufnr)
-                end, "Beautiful Hover Documentation")
+                map("n", "<leader>to", "<cmd>TSLspOrganize<CR>", "Organize imports")
+                map("n", "<leader>tR", "<cmd>TSLspRenameFile<CR>", "Rename file")
+                map("n", "<leader>ti", "<cmd>TSLspImportAll<CR>", "Import all")
+            end,
+            settings = {
+                typescript = {
+                    inlayHints = {
+                        includeInlayParameterNameHints = "all",
+                        includeInlayParameterNameHintsWhenArgumentMatchesName = true,
+                        includeInlayFunctionParameterTypeHints = true,
+                        includeInlayVariableTypeHints = true,
+                        includeInlayPropertyDeclarationTypeHints = true,
+                        includeInlayFunctionLikeReturnTypeHints = true,
+                        includeInlayEnumMemberValueHints = true,
+                    },
+                    suggest = {
+                        completeFunctionCalls = true,
+                    },
+                },
+                javascript = {
+                    inlayHints = {
+                        includeInlayParameterNameHints = "all",
+                        includeInlayParameterNameHintsWhenArgumentMatchesName = true,
+                        includeInlayFunctionParameterTypeHints = true,
+                        includeInlayVariableTypeHints = true,
+                        includeInlayPropertyDeclarationTypeHints = true,
+                        includeInlayFunctionLikeReturnTypeHints = true,
+                        includeInlayEnumMemberValueHints = true,
+                    },
+                    suggest = {
+                        completeFunctionCalls = true,
+                    },
+                },
+            },
+        })
 
-                -- Остальные маппинги остаются без изменений
-                map("n", "gd", vim.lsp.buf.definition, "Goto Definition")
-                map("n", "gD", vim.lsp.buf.declaration, "Goto Declaration")
-                map("n", "gi", vim.lsp.buf.implementation, "Goto Implementation")
-                map("n", "gr", vim.lsp.buf.references, "References")
-                map("n", "<leader>rn", vim.lsp.buf.rename, "Rename")
-                map("n", "<leader>ca", vim.lsp.buf.code_action, "Code Action")
-                map("n", "<leader>f", function()
-                    vim.lsp.buf.format({ async = true })
-                end, "Format")
+        -- Конфигурация для HTML (React JSX/TSX)
+        vim.lsp.config("html-lsp", {
+            capabilities = capabilities,
+            filetypes = { "html", "javascriptreact", "typescriptreact" },
+        })
 
-                -- Дополнительные полезные маппинги
-                map("n", "<leader>li", "<cmd>LspInfo<cr>", "LSP Info")
-                map("n", "<leader>lr", vim.lsp.buf.references, "References")
-                map("n", "<leader>ls", vim.lsp.buf.signature_help, "Signature Help")
-                map("n", "<leader>lq", vim.diagnostic.setloclist, "Diagnostics to Location List")
-            end
+        -- Конфигурация для CSS
+        vim.lsp.config("css_lsp", {
+            capabilities = capabilities,
+        })
 
-            -- Настройка обработчиков для красивого отображения
-            local border_opts = {
+        -- Конфигурация для JSON
+        vim.lsp.config("jsonls", {
+            capabilities = capabilities,
+            settings = {
+                json = {
+                    schemas = require("schemastore").json.schemas(),
+                    validate = { enable = true },
+                },
+            },
+        })
+
+        -- Общие горячие клавиши для всех LSP
+        vim.api.nvim_create_autocmd("LspAttach", {
+            callback = function(args)
+                local buf = args.buf
+                local client = vim.lsp.get_client_by_id(args.data.client_id)
+
+                local map = function(mode, lhs, rhs, desc)
+                    vim.keymap.set(mode, lhs, rhs, { buffer = buf, desc = desc })
+                end
+
+                -- Основная навигация
+                map("n", "gd", vim.lsp.buf.definition, "Go to definition")
+                map("n", "gD", vim.lsp.buf.declaration, "Go to declaration")
+                map("n", "gr", vim.lsp.buf.references, "Find references")
+                map("n", "gi", vim.lsp.buf.implementation, "Go to implementation")
+                map("n", "K", vim.lsp.buf.hover, "Hover documentation")
+                map("n", "<C-k>", vim.lsp.buf.signature_help, "Signature help")
+
+                -- Работа с кодом
+                map("n", "<leader>rn", vim.lsp.buf.rename, "Rename symbol")
+                map("n", "<leader>ca", vim.lsp.buf.code_action, "Code action")
+                map({ "n", "v" }, "<leader>ca", vim.lsp.buf.code_action, "Code action")
+
+                -- Диагностики
+                map("n", "[d", vim.diagnostic.goto_prev, "Previous diagnostic")
+                map("n", "]d", vim.diagnostic.goto_next, "Next diagnostic")
+                map("n", "<leader>dl", "<cmd>lua vim.diagnostic.setloclist()<CR>", "Show diagnostics list")
+
+                -- Информация о символе
+                map("n", "<leader>ds", function()
+                    vim.lsp.buf.document_symbol()
+                end, "Document symbols")
+
+                map("n", "<leader>ws", function()
+                    vim.lsp.buf.workspace_symbol()
+                end, "Workspace symbols")
+
+                -- Форматирование
+                if client.server_capabilities.documentFormattingProvider then
+                    map("n", "<leader>f", vim.lsp.buf.format, "Format buffer")
+                end
+
+                -- Подсветка символов под курсором
+                if client.server_capabilities.documentHighlightProvider then
+                    vim.api.nvim_create_autocmd({ "CursorHold", "CursorHoldI" }, {
+                        buffer = buf,
+                        callback = function()
+                            vim.lsp.buf.document_highlight()
+                        end,
+                    })
+
+                    vim.api.nvim_create_autocmd("CursorMoved", {
+                        buffer = buf,
+                        callback = function()
+                            vim.lsp.buf.clear_references()
+                        end,
+                    })
+                end
+            end,
+        })
+
+        -- Настройки диагностики
+        vim.diagnostic.config({
+            virtual_text = {
+                prefix = "●",
+                spacing = 4,
+            },
+            signs = true,
+            underline = true,
+            update_in_insert = false,
+            severity_sort = true,
+            float = {
                 border = "rounded",
-                focusable = false,
-                style = "minimal",
-            }
+                source = "always",
+            },
+        })
 
-            -- Красивое hover-окно
-            vim.lsp.handlers["textDocument/hover"] = vim.lsp.with(
-                vim.lsp.handlers.hover,
-                vim.tbl_extend("force", border_opts, {
-                    max_width = 80,
-                    max_height = 25,
-                    title = " 📚 Documentation ",
-                    title_pos = "center",
-                })
-            )
+        -- Символы для диагностики
+        local signs = { Error = " ", Warn = " ", Hint = " ", Info = " " }
+        for type, icon in pairs(signs) do
+            local hl = "DiagnosticSign" .. type
+            vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = hl })
+        end
 
-            -- Красивое окно подсказок сигнатур
-            vim.lsp.handlers["textDocument/signatureHelp"] = vim.lsp.with(
-                vim.lsp.handlers.signature_help,
-                vim.tbl_extend("force", border_opts, {
-                    title = " 🔧 Signature Help ",
-                })
-            )
+        -- Улучшенные ховер-окна
+        vim.lsp.handlers["textDocument/hover"] = vim.lsp.with(vim.lsp.handlers.hover, {
+            border = "rounded",
+            focusable = false,
+        })
 
-            -- Настройки для разных языков
-            -- Lua
-            vim.lsp.config("lua_ls", {
-                capabilities = capabilities,
-                on_attach = on_attach,
-                settings = {
-                    Lua = {
-                        runtime = {
-                            version = 'LuaJIT',
-                        },
-                        diagnostics = {
-                            globals = { "vim" },
-                            disable = { "lowercase-global" }
-                        },
-                        workspace = {
-                            library = vim.api.nvim_get_runtime_file("", true),
-                            checkThirdParty = false,
-                        },
-                        telemetry = { enable = false },
-                        hint = {
-                            enable = true,
-                        },
-                    },
-                },
-            })
-
-            -- Go
-            vim.lsp.config("gopls", {
-                capabilities = capabilities,
-                on_attach = on_attach,
-                settings = {
-                    gopls = {
-                        completeUnimported = true,
-                        usePlaceholders = true,
-                        experimentalPostfixCompletions = true,
-                        analyses = {
-                            unusedparams = true,
-                            shadow = true,
-                            nilness = true,
-                            unusedwrite = true,
-                            useany = true,
-                            unusedvariable = true,
-                            staticcheck = true,
-                        },
-                        hints = {
-                            assignVariableTypes = true,
-                            compositeLiteralFields = true,
-                            constantValues = true,
-                            functionTypeParameters = true,
-                            parameterNames = true,
-                            rangeVariableTypes = true,
-                        },
-                        staticcheck = true,
-                        gofumpt = true,
-                        directoryFilters = { "-node_modules", "-.git", "-.env", "-build" },
-                        codelenses = {
-                            generate = true,
-                            gc_details = true,
-                            test = true,
-                            tidy = true,
-                            upgrade_dependency = true,
-                            run_vulncheck_exp = true,
-                        },
-                        symbolMatcher = "fuzzy",
-                        semanticTokens = true,
-                        templateExtensions = { "gotmpl", "tmpl", "html" },
-                    },
-                },
-            })
-
-            -- TypeScript/JavaScript
-            vim.lsp.config("ts_ls", {
-                capabilities = capabilities,
-                on_attach = on_attach,
-                init_options = {
-                    preferences = {
-                        importModuleSpecifierPreference = "relative",
-                    },
-                },
-            })
-
-            -- HTML
-            vim.lsp.config("html", {
-                capabilities = capabilities,
-                on_attach = on_attach,
-                filetypes = { "html", "javascriptreact", "typescriptreact" },
-                init_options = {
-                    configurationSection = { "html", "css", "javascript" },
-                    embeddedLanguages = {
-                        css = true,
-                        javascript = true
-                    },
-                },
-            })
-
-            -- CSS
-            vim.lsp.config("cssls", {
-                capabilities = capabilities,
-                on_attach = on_attach,
-                settings = {
-                    css = {
-                        validate = true,
-                        lint = {
-                            unknownAtRules = "ignore"
-                        }
-                    },
-                    scss = {
-                        validate = true,
-                        lint = {
-                            unknownAtRules = "ignore"
-                        }
-                    },
-                    less = {
-                        validate = true,
-                        lint = {
-                            unknownAtRules = "ignore"
-                        }
-                    }
-                }
-            })
-
-            -- JSON
-            vim.lsp.config("jsonls", {
-                capabilities = capabilities,
-                on_attach = on_attach,
-                settings = {
-                    json = {
-                        schemas = require("schemastore").json.schemas(),
-                        validate = { enable = true },
-                    },
-                },
-            })
-
-            -- Диагностика с красивым оформлением
-            vim.diagnostic.config({
-                virtual_text = {
-                    prefix = "●",
-                    spacing = 4,
-                    format = function(diagnostic)
-                        local icons = {
-                            Error = "",
-                            Warn = "",
-                            Info = "",
-                            Hint = "",
-                        }
-                        local level = diagnostic.severity
-                        local level_name = vim.diagnostic.severity[level]
-                        return string.format("%s %s", icons[level_name] or "●", diagnostic.message)
-                    end,
-                },
-                signs = {
-                    text = {
-                        [vim.diagnostic.severity.ERROR] = "",
-                        [vim.diagnostic.severity.WARN] = "",
-                        [vim.diagnostic.severity.INFO] = "",
-                        [vim.diagnostic.severity.HINT] = "",
-                    },
-                    numhl = {
-                        [vim.diagnostic.severity.ERROR] = "DiagnosticSignError",
-                        [vim.diagnostic.severity.WARN] = "DiagnosticSignWarn",
-                        [vim.diagnostic.severity.INFO] = "DiagnosticSignInfo",
-                        [vim.diagnostic.severity.HINT] = "DiagnosticSignHint",
-                    },
-                },
-                underline = true,
-                update_in_insert = false,
-                severity_sort = true,
-                float = {
-                    border = "rounded",
-                    source = "always",
-                    header = "",
-                    prefix = function(diagnostic, i, total)
-                        local icons = {
-                            [vim.diagnostic.severity.ERROR] = " ",
-                            [vim.diagnostic.severity.WARN] = " ",
-                            [vim.diagnostic.severity.INFO] = " ",
-                            [vim.diagnostic.severity.HINT] = " ",
-                        }
-                        return icons[diagnostic.severity] or ""
-                    end,
-                    format = function(diagnostic)
-                        return string.format("%s [%s] %s",
-                            diagnostic.source or "",
-                            diagnostic.code or "",
-                            diagnostic.message
-                        )
-                    end,
-                },
-            })
-
-            -- Настройка цветов диагностик
-            vim.api.nvim_set_hl(0, "DiagnosticError", { fg = "#db4b4b" })
-            vim.api.nvim_set_hl(0, "DiagnosticWarn", { fg = "#e0af68" })
-            vim.api.nvim_set_hl(0, "DiagnosticInfo", { fg = "#0db9d7" })
-            vim.api.nvim_set_hl(0, "DiagnosticHint", { fg = "#10B981" })
-            vim.api.nvim_set_hl(0, "DiagnosticUnderlineError", { undercurl = true, sp = "#db4b4b" })
-            vim.api.nvim_set_hl(0, "DiagnosticUnderlineWarn", { undercurl = true, sp = "#e0af68" })
-            vim.api.nvim_set_hl(0, "DiagnosticUnderlineInfo", { undercurl = true, sp = "#0db9d7" })
-            vim.api.nvim_set_hl(0, "DiagnosticUnderlineHint", { undercurl = true, sp = "#10B981" })
-            vim.api.nvim_set_hl(0, "SpellBad", { undercurl = true, sp = "#db4b4b" })
-            vim.api.nvim_set_hl(0, "SpellCap", { undercurl = true, sp = "#e0af68" })
-            vim.api.nvim_set_hl(0, "SpellRare", { undercurl = true, sp = "#0db9d7" })
-            vim.api.nvim_set_hl(0, "SpellLocal", { undercurl = true, sp = "#10B981" })
-        end,
-    },
+        vim.lsp.handlers["textDocument/signatureHelp"] = vim.lsp.with(vim.lsp.handlers.signature_help, {
+            border = "rounded",
+            focusable = false,
+        })
+    end,
 }

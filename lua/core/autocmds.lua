@@ -20,13 +20,13 @@ vim.api.nvim_create_autocmd("FileType", {
     callback = function()
         -- Включаем проверку орфографии для комментариев в коде
         vim.opt_local.spell = true
-        vim.opt_local.spelllang = "en_us"
+        vim.opt_local.spelllang = "en_us,ru"
     end,
 })
 
--- organize imports для TypeScript/JavaScript
+-- organize imports для TypeScript/JavaScript/Go
 vim.api.nvim_create_autocmd("BufWritePre", {
-    pattern = { "*.ts", "*.tsx", "*.js", "*.jsx" },
+    pattern = { "*.ts", "*.tsx", "*.js", "*.jsx", "*.go" },
     callback = function()
         vim.lsp.buf.code_action({
             context = { only = { "source.organizeImports" } },
