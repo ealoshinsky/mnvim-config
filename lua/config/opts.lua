@@ -1,4 +1,3 @@
--- lua/core/options.lua
 vim.opt.number = true
 vim.opt.relativenumber = true
 vim.opt.mouse = "a"
@@ -36,7 +35,7 @@ vim.opt.copyindent = true
 vim.g.mapleader = " "
 vim.g.maplocalleader = " "
 
-vim.opt.spell = true -- По умолчанию выключено
+vim.opt.spell = false -- По умолчанию выключено
 vim.opt.spelllang = { "ru", "en_us" }
 vim.opt.spellsuggest = "best,9"
 vim.opt.spelloptions = "camel"

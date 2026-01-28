@@ -1,86 +1,5 @@
--- lua/plugins/init.lua
 return {
-    -- Менеджер плагинов
-    {
-        "folke/lazy.nvim",
-        tag = "stable",
-    },
-
-    -- Тема
-    {
-        "navarasu/onedark.nvim",
-        priority = 1000,
-        config = function()
-            require("onedark").load()
-        end,
-    },
-
-    -- Иконки
-    {
-        "nvim-tree/nvim-web-devicons",
-        lazy = true,
-    },
-
-    -- Файловый менеджер
-    {
-        "nvim-tree/nvim-tree.lua",
-        config = function()
-            require("nvim-tree").setup()
-            vim.keymap.set("n", "<leader>e", "<cmd>NvimTreeToggle<CR>", { desc = "File explorer" })
-        end,
-    },
-
-    -- Статусная строка
-    {
-        "nvim-lualine/lualine.nvim",
-        config = function()
-            require("lualine").setup({
-                options = {
-                    theme = "onedark",
-                    component_separators = { left = "", right = "" },
-                    section_separators = { left = "", right = "" },
-                    globalstatus = true,
-                },
-                sections = {
-                    lualine_a = { "mode" },
-                    lualine_b = { "branch", "diff", "diagnostics" },
-                    lualine_c = { { "filename", path = 1 } }, -- полный путь как в GoLand
-                    lualine_x = { "encoding", "fileformat", "filetype" },
-                    lualine_y = { "progress" },
-                    lualine_z = { "location" },
-                },
-            })
-        end,
-    },
-
-    -- Подсветка цветов
-    {
-        "norcalli/nvim-colorizer.lua",
-        event = { "BufReadPre", "BufNewFile" },
-        config = function()
-            require("colorizer").setup()
-        end,
-    },
-
-    -- Встроенный терминал
-    {
-        "akinsho/toggleterm.nvim",
-        version = "*",
-        config = function()
-            require("toggleterm").setup({
-                open_mapping = [[<c-\>]],
-                direction = "float",
-                float_opts = {
-                    border = "rounded",
-                },
-            })
-
-            vim.keymap.set("n", "<leader>tt", "<cmd>ToggleTerm<CR>", { desc = "Toggle terminal" })
-        end,
-    },
-
-    -- Автодополнение
-    {
+  {
         "hrsh7th/nvim-cmp",
         event = "InsertEnter",
         dependencies = {
@@ -89,8 +8,8 @@ return {
             "hrsh7th/cmp-path",
             "L3MON4D3/LuaSnip",
             "saadparwaiz1/cmp_luasnip",
-            "hrsh7th/cmp-nvim-lsp-signature-help", -- подсказка параметров функции прямо в строке
-            "onsails/lspkind.nvim",                -- иконки как в IntelliJ
+            "hrsh7th/cmp-nvim-lsp-signature-help",
+            "onsails/lspkind.nvim",               
         },
         config = function()
             local cmp = require("cmp")
@@ -110,7 +29,7 @@ return {
 
                 formatting = {
                     format = lspkind.cmp_format({
-                        mode = "symbol_text", -- как в GoLand: иконка + тип + имя
+                        mode = "symbol_text", 
                         maxwidth = 60,
                         ellipsis_char = "...",
                     }),
@@ -173,15 +92,6 @@ return {
                     { name = "nvim_lsp_signature_help" }, -- вот эта магия
                 })
             })
-        end,
-    },
-
-    -- Snippets
-    {
-        "L3MON4D3/LuaSnip",
-        dependencies = { "rafamadriz/friendly-snippets" },
-        config = function()
-            require("luasnip.loaders.from_vscode").lazy_load()
         end,
     },
 }

@@ -1,5 +1,6 @@
--- lua/plugins/indent-and-cursor.lua
 return {
+    require("plugins.mason"),
+    require("plugins.lsp"),
 	{
 		"lukas-reineke/indent-blankline.nvim",
 		main = "ibl",
@@ -14,4 +15,8 @@ return {
 		event = { "BufReadPost", "BufNewFile" },
 		config = true,
 	},
+     {
+        "L3MON4D3/LuaSnip",
+        dependencies = { "rafamadriz/friendly-snippets" },
+    },
 }
