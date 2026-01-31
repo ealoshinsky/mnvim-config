@@ -57,7 +57,7 @@ map("n", "<C-d>", "yyp", { desc = "Duplicate line" })
 map("v", "<C-d>", "y'>p", { desc = "Duplicate selection" })
 
 -- Удаление без копирования в буфер
-map({ "n", "v" }, "<leader>d", '"_d', { desc = "Delete without yanking" })
+map({ "n", "v" }, "<leader>ddd", '"_d', { desc = "Delete without yanking" })
 
 -- Вставка без замены буфера обмена
 map("v", "p", '"_dP', { desc = "Paste without yanking" })
@@ -139,17 +139,17 @@ map("n", "<leader>xq", "<cmd>Trouble qflist toggle<CR>", { desc = "Quickfix list
 -- ============================================
 map("n", "<leader>ft", "<cmd>TodoTelescope<CR>", { desc = "Find todos" })
 map("n", "]t", function()
-    require("todo-comments").jump_next()
+	require("todo-comments").jump_next()
 end, { desc = "Next todo comment" })
 map("n", "[t", function()
-    require("todo-comments").jump_prev()
+	require("todo-comments").jump_prev()
 end, { desc = "Previous todo comment" })
 
 -- ============================================
 -- ФОРМАТИРОВАНИЕ (CONFORM)
 -- ============================================
 map({ "n", "v" }, "<leader>f", function()
-    require("conform").format({ async = true, lsp_fallback = true })
+	require("conform").format({ async = true, lsp_fallback = true })
 end, { desc = "Format file or range" })
 
 -- ============================================
@@ -224,3 +224,4 @@ map("n", "<leader>n", "<cmd>set relativenumber!<CR>", { desc = "Toggle relative 
 
 -- Открыть конфигурацию Neovim
 map("n", "<leader>C", "<cmd>e $MYVIMRC<CR>", { desc = "Edit config" })
+
