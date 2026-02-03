@@ -7,7 +7,13 @@ M.adapters = {
 			port = "${port}",
 			executable = {
 				command = "dlv",
-				args = { "dap", "-l", "127.0.0.1:${port}" },
+				args = {
+					"dap",
+					"-l",
+					"127.0.0.1:${port}",
+					"--log",
+					"--log-output=dap",
+				},
 			},
 			options = {
 				initialize_timeout_sec = 15,

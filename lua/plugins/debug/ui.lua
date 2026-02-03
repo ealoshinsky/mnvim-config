@@ -50,8 +50,8 @@ function M.setup()
 			},
 			{
 				elements = {
-					{ id = "repl", size = 0.5 },
-					{ id = "console", size = 0.5 },
+					{ id = "repl", size = 1.0 },
+					--{ id = "console", size = 0.5 },
 				},
 				size = 10, -- Высота в строках
 				position = "bottom", -- или "top"

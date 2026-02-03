@@ -11,7 +11,7 @@ return {
 		local adapters = require("plugins.debug.adapters")
 		local ui = require("plugins.debug.ui")
 		local km = require("plugins.debug.keymaps")
-
+		require("dap-go").setup()
 		for lang, config in pairs(adapters.adapters) do
 			for field, item in pairs(config) do
 				if field == "adapter" then
