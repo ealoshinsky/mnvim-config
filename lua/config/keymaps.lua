@@ -224,4 +224,3 @@ map("n", "<leader>n", "<cmd>set relativenumber!<CR>", { desc = "Toggle relative 
 
 -- Открыть конфигурацию Neovim
 map("n", "<leader>C", "<cmd>e $MYVIMRC<CR>", { desc = "Edit config" })
-
