@@ -224,3 +224,81 @@ map("n", "<leader>n", "<cmd>set relativenumber!<CR>", { desc = "Toggle relative 
 
 -- Открыть конфигурацию Neovim
 map("n", "<leader>C", "<cmd>e $MYVIMRC<CR>", { desc = "Edit config" })
+
+-- ==============================================
+-- gitsigns
+-- ===============================================
+-- Navigation
+vim.keymap.set("n", "]c", function()
+	if vim.wo.diff then
+		vim.cmd.normal({ "]c", bang = true })
+	else
+		require("gitsigns").nav_hunk("next")
+	end
+end, { desc = "Next hunk" })
+
+vim.keymap.set("n", "[c", function()
+	if vim.wo.diff then
+		vim.cmd.normal({ "[c", bang = true })
+	else
+		require("gitsigns").nav_hunk("prev")
+	end
+end, { desc = "Prev hunk" })
+
+-- Staging
+vim.keymap.set("n", "<leader>hs", function()
+	require("gitsigns").stage_hunk()
+end, { desc = "Stage hunk" })
+vim.keymap.set("n", "<leader>hr", function()
+	require("gitsigns").reset_hunk()
+end, { desc = "Reset hunk" })
+vim.keymap.set("n", "<leader>hS", function()
+	require("gitsigns").stage_buffer()
+end, { desc = "Stage buffer" })
+vim.keymap.set("n", "<leader>hR", function()
+	require("gitsigns").reset_buffer()
+end, { desc = "Reset buffer" })
+vim.keymap.set("n", "<leader>hu", function()
+	require("gitsigns").undo_stage_hunk()
+end, { desc = "Undo stage hunk" })
+
+-- Visual mode
+vim.keymap.set("v", "<leader>hs", function()
+	require("gitsigns").stage_hunk({ vim.fn.line("."), vim.fn.line("v") })
+end, { desc = "Stage selected hunk" })
+
+vim.keymap.set("v", "<leader>hr", function()
+	require("gitsigns").reset_hunk({ vim.fn.line("."), vim.fn.line("v") })
+end, { desc = "Reset selected hunk" })
+
+-- Preview / blame
+vim.keymap.set("n", "<leader>hp", function()
+	require("gitsigns").preview_hunk()
+end, { desc = "Preview hunk" })
+vim.keymap.set("n", "<leader>hb", function()
+	require("gitsigns").blame_line({ full = true })
+end, { desc = "Blame line" })
+vim.keymap.set("n", "<leader>hB", function()
+	require("gitsigns").toggle_current_line_blame()
+end, { desc = "Toggle line blame" })
+
+-- Diff
+vim.keymap.set("n", "<leader>hd", function()
+	require("gitsigns").diffthis()
+end, { desc = "Diff this" })
+vim.keymap.set("n", "<leader>hD", function()
+	require("gitsigns").diffthis("~")
+end, { desc = "Diff this ~" })
+
+-- Toggles
+vim.keymap.set("n", "<leader>td", function()
+	require("gitsigns").toggle_deleted()
+end, { desc = "Toggle deleted" })
+vim.keymap.set("n", "<leader>tw", function()
+	require("gitsigns").toggle_word_diff()
+end, { desc = "Toggle word diff" })
+
+-- Text object
+vim.keymap.set({ "o", "x" }, "ih", function()
+	require("gitsigns").select_hunk()
+end, { desc = "Select hunk" })

@@ -1,82 +1,86 @@
 return {
     {
-  "nvim-treesitter/nvim-treesitter",
-  build = ":TSUpdate",
-  event= {"BufReadPost", "BufNewFile"},
-  cmd = { "TSUpdateSync", "TSUpdate", "TSInstall"},
-  config = function()
-    require("nvim-treesitter.config").setup({
-        -- Установить парсеры для нужных языков
-        ensure_installed = {
-            "lua", "vim", "vimdoc", -- Обязательные для Neovim
-            "python", "javascript", "typescript", "html", "css",
-            "json", "yaml", "toml", "markdown", "bash",
-             "go", "sql", "dockerfile",
-        },
+        "nvim-treesitter/nvim-treesitter",
+        branch = "main",
+        lazy = false,
+        build = ":TSUpdate",
+        cmd = { "TSInstall", "TSUpdate", "TSUninstall", "TSLog" },
+        config = function()
+            local ts = require("nvim-treesitter")
 
-        -- Синхронная установка парсеров (может замедлить запуск)
-        sync_install = false,
+            ts.setup({
+                -- Парсеры и queries ставятся сюда (каталог добавляется в runtimepath)
+                install_dir = vim.fn.stdpath("data") .. "/site",
+            })
 
-        -- Автоматически обновлять парсеры при изменении `ensure_installed`
-        auto_install = true, -- Очень удобная опция!
+            -- Список парсеров. Установка асинхронная: недостающие
+            -- докачиваются в фоне при первом запуске.
+            local parsers = {
+                "lua", "vim", "vimdoc", "query", -- Обязательные для Neovim
+                "python", "javascript", "typescript", "tsx", "jsdoc",
+                "html", "css", "scss", "vue", -- Vue 3 SFC: template/script/style
+                "json", "yaml", "toml", "markdown", "markdown_inline",
+                "bash", "go", "gomod", "gosum", "sql", "dockerfile",
+            }
 
-        -- Включить подсветку синтаксиса
-        highlight = {
-            enable = true,
-            additional_vim_regex_highlighting = false, -- Отключить legacy-подсветку
-        },
+            local installed = ts.get_installed("parsers")
+            local missing = vim.tbl_filter(function(lang)
+                return not vim.tbl_contains(installed, lang)
+            end, parsers)
 
-        -- Включить вкладку (отступы) на основе деревьев
-        indent = {
-            enable = true,
-        },
+            if #missing > 0 then
+                ts.install(missing)
+            end
 
-        -- Включить автозакрытие тегов (для HTML/XML и подобных)
-        autotag = {
-            enable = true,
-        },
+            -- Подсветка/отступы/сворачивание включаются вручную:
+            -- в ветке main nvim-treesitter больше не делает это сам.
+            vim.api.nvim_create_autocmd("FileType", {
+                group = vim.api.nvim_create_augroup("treesitter_start", { clear = true }),
+                callback = function(ev)
+                    local lang = vim.treesitter.language.get_lang(ev.match)
+                    if not lang then
+                        return
+                    end
 
-        -- Дополнительные модули (опционально)
-        incremental_selection = {
-            enable = true,
-            keymaps = {
-            init_selection = "<C-space>", -- Начать выделение
-            node_incremental = "<C-space>", -- Расширить выделение
-            scope_incremental = "<C-s>", -- Выделить область
-            node_decremental = "<C-bs>", -- Сузить выделение
-            },
-        },
-        textobjects = { -- Работа с объектами (функции, классы и т.д.)
-            enable = true,
-            select = {
-                enable = true,
-                keymaps = {
-                ["af"] = "@function.outer",
-                ["if"] = "@function.inner",
-                ["ac"] = "@class.outer",
-                ["ic"] = "@class.inner",
-                },
-            },
-        },
-    })
-    	-- Folding
-			vim.opt.foldmethod = "expr"
-			vim.opt.foldexpr = "nvim_treesitter#foldexpr()"
-			vim.opt.foldlevel = 99
-  end,
+                    -- language.add() не бросает ошибку, а возвращает false,
+                    -- если парсера нет (gitcommit, git_rebase и т.п.),
+                    -- поэтому проверяем именно возвращаемое значение.
+                    local ok, added = pcall(vim.treesitter.language.add, lang)
+                    if not ok or not added then
+                        return
+                    end
+
+                    -- Подсветка
+                    if not pcall(vim.treesitter.start, ev.buf, lang) then
+                        return
+                    end
+
+                    -- Отступы
+                    vim.bo[ev.buf].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+
+                    -- Сворачивание по дереву (только для окна с этим буфером)
+                    if vim.api.nvim_get_current_buf() == ev.buf then
+                        vim.wo[0][0].foldmethod = "expr"
+                        vim.wo[0][0].foldexpr = "v:lua.vim.treesitter.foldexpr()"
+                    end
+                end,
+            })
+
+            vim.opt.foldlevel = 99
+        end,
     },
     {
         "windwp/nvim-ts-autotag",
-		event = { "BufReadPost", "BufNewFile" },
-		dependencies = { "nvim-treesitter/nvim-treesitter" },
-		config = function()
-			require("nvim-ts-autotag").setup({
-				opts = {
-					enable_close = true,
-					enable_rename = true,
-					enable_close_on_slash = false,
-				},
-			})
-		end,
-    }
+        event = { "BufReadPost", "BufNewFile" },
+        dependencies = { "nvim-treesitter/nvim-treesitter" },
+        config = function()
+            require("nvim-ts-autotag").setup({
+                opts = {
+                    enable_close = true,
+                    enable_rename = true,
+                    enable_close_on_slash = false,
+                },
+            })
+        end,
+    },
 }

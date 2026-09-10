@@ -20,7 +20,8 @@ return {
             require("mason-lspconfig").setup({
             ensure_installed = {
                 "gopls",
-                "ts_ls",
+                "vtsls",
+                "vue_ls",
                 "html",
                 "cssls",
                 "jsonls",
@@ -30,6 +31,8 @@ return {
                 "lua_ls"
             },
             automatic_installation = true,
+            -- ts_ls конфликтует с vtsls, а vue_ls (v3) работает только через vtsls
+            automatic_enable = { exclude = { "ts_ls" } },
             })
     end
     },

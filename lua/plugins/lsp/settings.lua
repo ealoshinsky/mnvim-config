@@ -1,6 +1,11 @@
 -- LSP server configurations
 local M = {}
 
+-- Путь до @vue/language-server, установленного через Mason.
+-- Подключается в vtsls как TypeScript-плагин @vue/typescript-plugin.
+M.vue_language_server_path = vim.fn.stdpath("data")
+	.. "/mason/packages/vue-language-server/node_modules/@vue/language-server"
+
 M.servers = {
 	gopls = {
 		cmd = { "gopls" },
@@ -51,8 +56,12 @@ M.servers = {
 		},
 	},
 
-	ts_ls = {
-		cmd = { "typescript-language-server", "--stdio" },
+	-- vtsls вместо ts_ls: Vue Language Server v3 работает только в hybrid mode
+	-- и пробрасывает TS-запросы через команду `typescript.tsserverRequest`,
+	-- которой нет в typescript-language-server (ts_ls).
+	-- Включать ts_ls и vtsls одновременно нельзя.
+	vtsls = {
+		cmd = { "vtsls", "--stdio" },
 		filetypes = {
 			"javascript",
 			"javascriptreact",
@@ -60,38 +69,63 @@ M.servers = {
 			"typescript",
 			"typescriptreact",
 			"typescript.tsx",
+			"vue",
 		},
 		root_markers = { "package.json", "tsconfig.json", "jsconfig.json", ".git" },
 		settings = {
-			typescript = {
-				inlayHints = {
-					includeInlayParameterNameHints = "all",
-					includeInlayParameterNameHintsWhenArgumentMatchesName = true,
-					includeInlayFunctionParameterTypeHints = true,
-					includeInlayVariableTypeHints = true,
-					includeInlayPropertyDeclarationTypeHints = true,
-					includeInlayFunctionLikeReturnTypeHints = true,
-					includeInlayEnumMemberValueHints = true,
+			vtsls = {
+				autoUseWorkspaceTsdk = true,
+				experimental = {
+					completion = { enableServerSideFuzzyMatch = true },
 				},
-				suggest = {
-					completeFunctionCalls = true,
+				tsserver = {
+					globalPlugins = {
+						{
+							name = "@vue/typescript-plugin",
+							location = M.vue_language_server_path,
+							languages = { "vue" },
+							configNamespace = "typescript",
+							-- без этого плагин не подключается, когда tsserver
+							-- берёт TypeScript из node_modules проекта
+							enableForWorkspaceTypeScriptVersions = true,
+						},
+					},
+				},
+			},
+			typescript = {
+				updateImportsOnFileMove = { enabled = "always" },
+				suggest = { completeFunctionCalls = true },
+				inlayHints = {
+					parameterNames = { enabled = "all" },
+					parameterTypes = { enabled = true },
+					variableTypes = { enabled = true },
+					propertyDeclarationTypes = { enabled = true },
+					functionLikeReturnTypes = { enabled = true },
+					enumMemberValues = { enabled = true },
 				},
 			},
 			javascript = {
+				updateImportsOnFileMove = { enabled = "always" },
+				suggest = { completeFunctionCalls = true },
 				inlayHints = {
-					includeInlayParameterNameHints = "all",
-					includeInlayParameterNameHintsWhenArgumentMatchesName = true,
-					includeInlayFunctionParameterTypeHints = true,
-					includeInlayVariableTypeHints = true,
-					includeInlayPropertyDeclarationTypeHints = true,
-					includeInlayFunctionLikeReturnTypeHints = true,
-					includeInlayEnumMemberValueHints = true,
-				},
-				suggest = {
-					completeFunctionCalls = true,
+					parameterNames = { enabled = "all" },
+					parameterTypes = { enabled = true },
+					variableTypes = { enabled = true },
+					propertyDeclarationTypes = { enabled = true },
+					functionLikeReturnTypes = { enabled = true },
+					enumMemberValues = { enabled = true },
 				},
 			},
 		},
+	},
+
+	-- Vue 3 SFC: template/style + проксирование TS в vtsls.
+	-- Обработчик `tsserver/request` берётся из дефолтного конфига nvim-lspconfig
+	-- (lsp/vue_ls.lua) — он сам находит клиент vtsls в буфере.
+	vue_ls = {
+		cmd = { "vue-language-server", "--stdio" },
+		filetypes = { "vue" },
+		root_markers = { "vite.config.ts", "vite.config.js", "nuxt.config.ts", "package.json", ".git" },
 	},
 
 	html = {

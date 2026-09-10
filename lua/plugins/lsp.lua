@@ -14,11 +14,14 @@ return {
                 ensure_installed = {
                     "lua_ls",
                     "gopls",
-                    "ts_ls",
+                    "vtsls",
+                    "vue_ls",
                     "html",
                     "cssls",
                     "jsonls",
                 },
+                -- ts_ls конфликтует с vtsls, а vue_ls требует именно vtsls
+                automatic_enable = { exclude = { "ts_ls" } },
             })
         end,
     },
@@ -66,28 +69,30 @@ return {
             -- АВТОМАТИЧЕСКОЕ ВКЛЮЧЕНИЕ LSP ДЛЯ ФАЙЛОВ
             -- ============================================
             local filetypes_to_servers = {
-                go = "gopls",
-                gomod = "gopls",
-                gowork = "gopls",
-                gotmpl = "gopls",
-                javascript = "ts_ls",
-                javascriptreact = "ts_ls",
-                typescript = "ts_ls",
-                typescriptreact = "ts_ls",
-                html = "html",
-                css = "cssls",
-                scss = "cssls",
-                less = "cssls",
-                json = "jsonls",
-                jsonc = "jsonls",
-                lua = "lua_ls",
+                go = { "gopls" },
+                gomod = { "gopls" },
+                gowork = { "gopls" },
+                gotmpl = { "gopls" },
+                javascript = { "vtsls" },
+                javascriptreact = { "vtsls" },
+                typescript = { "vtsls" },
+                typescriptreact = { "vtsls" },
+                -- Vue 3 SFC: vtsls отвечает за <script>, vue_ls — за <template>/<style>
+                vue = { "vtsls", "vue_ls" },
+                html = { "html" },
+                css = { "cssls" },
+                scss = { "cssls" },
+                less = { "cssls" },
+                json = { "jsonls" },
+                jsonc = { "jsonls" },
+                lua = { "lua_ls" },
             }
 
-            for ft, server in pairs(filetypes_to_servers) do
+            for ft, servers in pairs(filetypes_to_servers) do
                 vim.api.nvim_create_autocmd("FileType", {
                     pattern = ft,
                     callback = function()
-                        vim.lsp.enable(server)
+                        vim.lsp.enable(servers)
                     end,
                 })
             end
