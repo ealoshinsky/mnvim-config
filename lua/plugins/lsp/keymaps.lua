@@ -18,9 +18,14 @@ function M.setup(buf, client)
 	-- ============================================
 	-- ДОКУМЕНТАЦИЯ
 	-- ============================================
-	map("n", "K", vim.lsp.buf.hover, "Hover documentation")
-	map("n", "<C-k>", vim.lsp.buf.signature_help, "Signature help")
-	map("i", "<C-k>", vim.lsp.buf.signature_help, "Signature help")
+	-- В Neovim 0.11 рамка задаётся прямо в вызове (vim.lsp.handlers больше не используются)
+	local float_opts = { border = "rounded", max_width = 80 }
+	map("n", "K", function()
+		vim.lsp.buf.hover(float_opts)
+	end, "Hover documentation")
+	map({ "n", "i" }, "<C-k>", function()
+		vim.lsp.buf.signature_help(float_opts)
+	end, "Signature help")
 
 	-- ============================================
 	-- РЕФАКТОРИНГ
@@ -31,8 +36,12 @@ function M.setup(buf, client)
 	-- ============================================
 	-- ДИАГНОСТИКА
 	-- ============================================
-	map("n", "[d", vim.diagnostic.goto_prev, "Previous diagnostic")
-	map("n", "]d", vim.diagnostic.goto_next, "Next diagnostic")
+	map("n", "[d", function()
+		vim.diagnostic.jump({ count = -1, float = true })
+	end, "Previous diagnostic")
+	map("n", "]d", function()
+		vim.diagnostic.jump({ count = 1, float = true })
+	end, "Next diagnostic")
 	map("n", "<leader>ee", vim.diagnostic.open_float, "Show diagnostic")
 	map("n", "<leader>dl", vim.diagnostic.setloclist, "Diagnostics to loclist")
 
@@ -42,14 +51,7 @@ function M.setup(buf, client)
 	map("n", "<leader>ds", vim.lsp.buf.document_symbol, "Document symbols")
 	map("n", "<leader>ws", vim.lsp.buf.workspace_symbol, "Workspace symbols")
 
-	-- ============================================
-	-- ФОРМАТИРОВАНИЕ
-	-- ============================================
-	if client.server_capabilities.documentFormattingProvider then
-		map("n", "<leader>f", function()
-			vim.lsp.buf.format({ async = false })
-		end, "Format buffer")
-	end
+	-- Форматирование (<leader>f) — через conform.nvim, см. plugins/conform.lua
 
 	-- ============================================
 	-- INLAY HINTS

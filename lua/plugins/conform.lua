@@ -6,13 +6,15 @@ return {
         {
             "<leader>f",
             function()
-                require("conform").format({ async = true, lsp_fallback = true })
+                require("conform").format({ async = true, lsp_format = "fallback" })
             end,
             mode = { "n", "v" },
             desc = "Format buffer",
         },
     },
     config = function()
+        local js_formatters = { "oxfmt", "prettier", stop_after_first = true }
+
         require("conform").setup({
             formatters_by_ft = {
                 -- Go
@@ -21,12 +23,13 @@ return {
                 -- Lua
                 lua = { "stylua" },
 
-                -- JavaScript/TypeScript
-                javascript = { "prettier" },
-                typescript = { "prettier" },
-                javascriptreact = { "prettier" },
-                typescriptreact = { "prettier" },
-                vue = { "prettier" },
+                -- JavaScript/TypeScript: oxfmt из node_modules проекта, если он есть,
+                -- иначе prettier
+                javascript = js_formatters,
+                typescript = js_formatters,
+                javascriptreact = js_formatters,
+                typescriptreact = js_formatters,
+                vue = js_formatters,
 
                 -- Web
                 json = { "prettier" },
@@ -50,6 +53,10 @@ return {
 
             -- Форматирование при сохранении
             format_on_save = function(bufnr)
+                if vim.g.disable_autoformat or vim.b[bufnr].disable_autoformat then
+                    return
+                end
+
                 -- Отключить для определённых файлов
                 local bufname = vim.api.nvim_buf_get_name(bufnr)
                 if bufname:match("/node_modules/") then
@@ -58,7 +65,7 @@ return {
 
                 return {
                     timeout_ms = 500,
-                    lsp_fallback = true,
+                    lsp_format = "fallback",
                 }
             end,
 

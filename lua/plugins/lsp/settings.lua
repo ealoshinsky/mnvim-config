@@ -134,6 +134,14 @@ M.servers = {
 		root_markers = { ".git" },
 	},
 
+	-- Без vue: в .vue emmet лезет в <script> с мусорными подсказками,
+	-- а HTML в <template> и так дополняет vue_ls.
+	emmet_ls = {
+		cmd = { "emmet-ls", "--stdio" },
+		filetypes = { "html", "css", "scss", "sass", "less", "javascriptreact", "typescriptreact" },
+		root_markers = { ".git" },
+	},
+
 	cssls = {
 		cmd = { "vscode-css-language-server", "--stdio" },
 		filetypes = { "css", "scss", "less" },

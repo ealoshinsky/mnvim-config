@@ -1,6 +1,4 @@
 return {
-    require("plugins.mason"),
-    require("plugins.lsp"),
 	{
 		"lukas-reineke/indent-blankline.nvim",
 		main = "ibl",

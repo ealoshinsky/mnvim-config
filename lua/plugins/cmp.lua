@@ -15,6 +15,9 @@ return {
             local cmp = require("cmp")
             local lspkind = require("lspkind")
 
+            -- Сниппеты из friendly-snippets (в т.ч. для vue/ts)
+            require("luasnip.loaders.from_vscode").lazy_load()
+
             cmp.setup({
                 snippet = {
                     expand = function(args)
@@ -65,7 +68,14 @@ return {
                 sources = cmp.config.sources({
                     { name = "nvim_lsp",                priority = 1000 },
                     { name = "nvim_lsp_signature_help", priority = 900 }, -- параметры функции
-                    { name = "luasnip",                 priority = 800 },
+                    {
+                        name = "luasnip",
+                        priority = 800,
+                        -- после "obj." нужны поля объекта, а не сниппеты
+                        entry_filter = function(_, ctx)
+                            return not ctx.cursor_before_line:match("%.[%w_]*$")
+                        end,
+                    },
                     { name = "buffer",                  priority = 500 },
                     { name = "path",                    priority = 250 },
                 }),

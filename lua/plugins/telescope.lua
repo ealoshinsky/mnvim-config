@@ -2,6 +2,11 @@ return {
     {
         'nvim-telescope/telescope.nvim',
         version = '*',
+        -- Кеймапы в config/keymaps.lua вызывают <cmd>Telescope ...<CR>, поэтому
+        -- команда должна существовать до загрузки плагина. Без этого фрагмент
+        -- с keys в plugins/markdown.lua делает telescope ленивым и :Telescope
+        -- падает с E492 до первого обращения к плагину.
+        cmd = 'Telescope',
         dependencies = {
             'nvim-lua/plenary.nvim',
             { 'nvim-telescope/telescope-fzf-native.nvim', build = 'make' },

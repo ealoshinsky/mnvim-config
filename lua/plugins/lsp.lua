@@ -1,29 +1,46 @@
 -- Main LSP configuration (for Neovim 0.11+)
+
+-- Серверы из mason, для которых хватает дефолтного конфига nvim-lspconfig
+local default_servers = { "yamlls", "dockerls", "bashls", "marksman" }
+
 return {
     {
-        "williamboman/mason.nvim",
-        config = function()
-            require("mason").setup()
-        end,
+        "mason-org/mason.nvim",
+        -- грузим сразу: mason добавляет свой bin/ в PATH, без этого LSP не находятся
+        lazy = false,
+        opts = {
+            ui = {
+                icons = {
+                    package_installed = "✓",
+                    package_pending = "➜",
+                    package_uninstalled = "✗",
+                },
+            },
+        },
     },
     {
-        "williamboman/mason-lspconfig.nvim",
-        dependencies = "williamboman/mason.nvim",
-        config = function()
-            require("mason-lspconfig").setup({
-                ensure_installed = {
-                    "lua_ls",
-                    "gopls",
-                    "vtsls",
-                    "vue_ls",
-                    "html",
-                    "cssls",
-                    "jsonls",
-                },
-                -- ts_ls конфликтует с vtsls, а vue_ls требует именно vtsls
-                automatic_enable = { exclude = { "ts_ls" } },
-            })
-        end,
+        "mason-org/mason-lspconfig.nvim",
+        dependencies = { "mason-org/mason.nvim", "neovim/nvim-lspconfig" },
+        opts = {
+            ensure_installed = {
+                "lua_ls",
+                "gopls",
+                "vtsls",
+                "vue_ls",
+                "html",
+                "cssls",
+                "jsonls",
+                "yamlls",
+                "dockerls",
+                "bashls",
+                "emmet_ls",
+                -- markdown: переходы по ссылкам между файлами, символы-заголовки
+                "marksman",
+            },
+            -- Серверы включаются явно ниже через vim.lsp.enable.
+            -- ts_ls не ставим: он конфликтует с vtsls, а vue_ls (v3) работает только через vtsls.
+            automatic_enable = false,
+        },
     },
     {
         "hrsh7th/cmp-nvim-lsp",
@@ -36,8 +53,8 @@ return {
         event = { "BufReadPre", "BufNewFile" },
         dependencies = {
             "hrsh7th/cmp-nvim-lsp",
-            "williamboman/mason.nvim",
-            "williamboman/mason-lspconfig.nvim",
+            "mason-org/mason.nvim",
+            "mason-org/mason-lspconfig.nvim",
             "b0o/schemastore.nvim",
         },
         config = function()
@@ -66,36 +83,12 @@ return {
             end
 
             -- ============================================
-            -- АВТОМАТИЧЕСКОЕ ВКЛЮЧЕНИЕ LSP ДЛЯ ФАЙЛОВ
+            -- ВКЛЮЧЕНИЕ LSP СЕРВЕРОВ
             -- ============================================
-            local filetypes_to_servers = {
-                go = { "gopls" },
-                gomod = { "gopls" },
-                gowork = { "gopls" },
-                gotmpl = { "gopls" },
-                javascript = { "vtsls" },
-                javascriptreact = { "vtsls" },
-                typescript = { "vtsls" },
-                typescriptreact = { "vtsls" },
-                -- Vue 3 SFC: vtsls отвечает за <script>, vue_ls — за <template>/<style>
-                vue = { "vtsls", "vue_ls" },
-                html = { "html" },
-                css = { "cssls" },
-                scss = { "cssls" },
-                less = { "cssls" },
-                json = { "jsonls" },
-                jsonc = { "jsonls" },
-                lua = { "lua_ls" },
-            }
-
-            for ft, servers in pairs(filetypes_to_servers) do
-                vim.api.nvim_create_autocmd("FileType", {
-                    pattern = ft,
-                    callback = function()
-                        vim.lsp.enable(servers)
-                    end,
-                })
-            end
+            -- vim.lsp.enable сам подключает сервер к буферам по его filetypes.
+            -- Для .vue стартуют оба: vtsls (<script>, через @vue/typescript-plugin)
+            -- и vue_ls (<template>/<style>).
+            vim.lsp.enable(vim.list_extend(vim.tbl_keys(lsp_settings.servers), default_servers))
 
             -- ============================================
             -- НАСТРОЙКА KEYBINDINGS ПРИ ПОДКЛЮЧЕНИИ LSP
